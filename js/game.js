@@ -402,7 +402,7 @@ function lightBeam(x,y){const u=1-lightT/1.6,rise=Math.min(1,u*3.2),fade=u<.55?1
 function heartRise(x,y){const u=1-lightT/1.6;if(u>.9)return;for(let i=0;i<4;i++){const v=(u*1.4+i*.25)%1;g.globalAlpha=Math.max(0,1-v);g.drawImage(HRT,Math.round(x+Math.sin(v*6+i*1.7)*10)-3,Math.round(y-8-v*34),7,6)}g.globalAlpha=1;
  for(let i=0;i<7;i++){const v=(u*2+i*.14)%1,sx=Math.round(x+Math.sin(i*2.3+u*5)*13),sy=Math.round(y-v*38);g.fillStyle=i&1?'#fff':'#ffe9a0';g.fillRect(sx,sy,1,1);g.fillRect(sx-1,sy,3,1);g.fillRect(sx,sy-1,1,3)}}
 const FTN=new Map(),fOn=()=>vis>0&&!(boss&&boss.on),tint=(im,col)=>{let m=FTN.get(col);if(!m){m=new Map();FTN.set(col,m)}let t=m.get(im);if(!t){t=mk(im.width,im.height,x=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,im.width,im.height)});m.set(im,t)}return t};
-function focusDim(){const k=Math.max(0,Math.min(1,(5-vis)*4,vis*4));g.fillStyle='rgba(8,64,28,'+(.5*k)+')';g.fillRect(0,0,384,216)}
+function focusDim(){const k=Math.max(0,Math.min(1,(5-vis)*4,vis*4)),gr=g.createRadialGradient(192,108,50,192,108,235);gr.addColorStop(0,'rgba(8,64,28,'+(.4*k)+')');gr.addColorStop(1,'rgba(2,26,10,'+(.78*k)+')');g.fillStyle=gr;g.fillRect(0,0,384,216)}
 function focusGlow(im,x,y,hc,tc,r){const p=.5+.5*Math.sin(T*7+x*.3);g.globalAlpha=.18+.14*p;el(g,x+im.width/2,y+im.height/2,im.width/2+r,im.height/2+r,hc);g.globalAlpha=.55+.35*p;g.drawImage(tint(im,tc),x,y);g.globalAlpha=1}
 function focusHud(){const on=vis>0,rd=visCd<=0&&!on;hudRow(18,'F FOCO',on?vis/5:rd?1:1-visCd/7,on?'#9be86a':rd?'#6fe6a8':'#7b8896',rd||on)}
 function hudRow(y,label,fr,col,on){g.fillStyle='#1d1a17';g.fillRect(6,y,86,9);g.fillStyle=on?'#2b3a33':'#3a3330';g.fillRect(7,y+1,84,7);pt3(label,9,y+2,on?'#fff4d0':'#9a9088');g.fillStyle='#1d1a17';g.fillRect(56,y+2,34,5);g.fillStyle=col;g.fillRect(57,y+3,Math.round(32*Math.max(0,Math.min(1,fr))),3)}
@@ -734,7 +734,8 @@ let last=0;function loop(ts){{const wc=!!(boss&&boss.on&&!boss.dead);if(CB&&wc!=
 const JK=['w','arrowup'];
 function dn(k){k=k.toLowerCase();K[k]=1;
  if(k=='escape'){if(S.mode=='play')pauseP();else if(S.mode=='pause')resume();return}
- if(S.mode=='cine'){if(k==' '||k=='e'||k=='enter')cineNext();return}if(S.mode!='play'||vict>0)return;if(JK.includes(k))jb=.12;if(k=='arrowdown'||k=='enter')act();if(k=='f'&&!(boss&&boss.on)&&vis<=0&&visCd<=0){vis=5;sfx(700,.2,'sine',1200)}if(k==' ')tongue();if(k=='c'&&boss&&boss.on&&!boss.dead&&camT<=0&&camCd<=0){camT=camDur=(boss&&boss.on&&!boss.dead?4:3);sfx(250,.4,'sine',90)}if(k=='i')invP()}
+ if(k=='enter'&&S.mode=='panel'){const b=$('o').querySelector('button.b:not([disabled])');if(b&&/GUARDAR PISTA/.test(b.textContent))b.click();return}
+ if(S.mode=='cine'){if(k==' '||k=='e'||k=='enter')cineNext();return}if(S.mode!='play'||vict>0)return;if(JK.includes(k))jb=.12;if(k=='arrowdown')act();if(k=='f'&&!(boss&&boss.on)&&vis<=0&&visCd<=0){vis=5;sfx(700,.2,'sine',1200)}if(k==' ')tongue();if(k=='c'&&boss&&boss.on&&!boss.dead&&camT<=0&&camCd<=0){camT=camDur=(boss&&boss.on&&!boss.dead?4:3);sfx(250,.4,'sine',90)}if(k=='i')invP()}
 function up(k){k=k.toLowerCase();K[k]=0;if(JK.includes(k)&&P.vy<-90)P.vy*=.5}
 addEventListener('keydown',e=>{if(S.mode=='play'&&[' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))e.preventDefault();if(!e.repeat)dn(e.key)});
 addEventListener('keyup',e=>up(e.key));addEventListener('blur',()=>{for(const k in K)K[k]=0});
