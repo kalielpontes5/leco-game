@@ -463,28 +463,27 @@ function foeShot(s){const k=s.t,y=s.y-12,f=s.f;sfx(k==1?260:k==2?140:520,.12,'sq
 function sAt(x,a,b){return st.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a)}
 function walkAI(s,dt){
  if(!s.seen){s.x+=s.d*26*dt;if(s.x>s.b)s.d=-1;if(s.x<s.a)s.d=1;return}
- s.hx=s.hx||s.x;s.vy=s.vy||0;s.vx=s.vx||0;s.rv=Math.max(0,(s.rv||0)-dt);
+ s.hx=s.hx||s.x;s.vy=s.vy||0;s.vx=s.vx||0;
  const sf=st.concat(vs,mv.map(m=>[m.x,m.y,m.w,8])),
   at=(x,a,b)=>sf.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a),
   tp=(x,a,b)=>{let t=null;sf.forEach(q=>{if(x>q[0]&&x<q[0]+q[2]&&q[1]>=a&&q[1]<=b&&(t==null||q[1]<t))t=q[1]});return t},
   og=s.vy==0&&at(s.x,s.y+.5,s.y+3);
  let dir=P.x>s.x+4?1:P.x<s.x-4?-1:(Math.abs(P.y-s.y)>24?(s.d||1):0);
- if(s.rv>0)dir=-dir||s.d||1;
- if(og){let go=dir,jmp=0,jv=240;
+ if(og){let go=dir,jmp=0,jv=240,zw=0;
   if(dir){const ax=s.x+dir*9,wl=sf.filter(q=>ax>q[0]&&ax<q[0]+q[2]&&q[1]<s.y-3&&q[1]+q[3]>s.y-22),
-    jvf=t=>Math.min(300,Math.max(240,Math.sqrt(1600*(Math.max(0,s.y-t)+8)))),
-    rch=(k,t)=>{const v=jvf(t);return k<=80*(v+Math.sqrt(Math.max(0,v*v-1600*(s.y-t))))/800*.85},
+    jvf=t=>Math.min(440,Math.max(240,Math.sqrt(1600*(Math.max(0,s.y-t)+8)))),
+    rch=(k,t)=>{const v=jvf(t);return k<=110*(v+Math.sqrt(Math.max(0,v*v-1600*(s.y-t))))/800*.85},
     spk=(x,t)=>sk.some(q=>x>q[0]-6&&x<q[0]+q[2]+6&&Math.abs(q[1]-t)<8),
     fd=(a,b,ks)=>{for(const k of ks){const x=s.x+dir*k,t=tp(x,a,b);if(t!=null&&!at(x,t-22,t-2)&&!spk(x,t)&&rch(k,t))return t}return null};
-   if(wl.length){const h=s.y-Math.min(...wl.map(q=>q[1]));if(h<=50){jmp=1;jv=jvf(s.y-h)}else go=0}
+   if(wl.length){const h=s.y-Math.min(...wl.map(q=>q[1]));if(h<=118){jmp=1;jv=jvf(s.y-h)}else go=0}
    else if(!at(s.x+dir*10,s.y+.5,s.y+3)){const dx=s.x+dir*18,dt2=P.y>s.y+10?tp(dx,s.y+3,190):null;
-    if(dt2!=null&&!spk(dx,dt2))go=dir;else{const t=fd(s.y-52,s.y+14,[14,22,30,38]);if(t!=null){jmp=1;jv=jvf(t)}else go=0}}
-   else{const t=P.y<s.y-14?fd(s.y-56,s.y-6,[10,18,26,34]):null;
+    if(dt2!=null&&!spk(dx,dt2))go=dir;else{const t=fd(s.y-110,s.y+14,[14,22,30,38,46,54]);if(t!=null){jmp=1;jv=jvf(t)}else go=0}}
+   else{const t=P.y<s.y-14?fd(s.y-110,s.y-6,[10,18,26,34,42]):null;
     if(t!=null){jmp=1;jv=jvf(t)}
     else if(sk.some(k=>Math.abs(k[1]-s.y)<5&&s.x+dir*12>k[0]-2&&s.x+dir*12<k[0]+k[2]+2))jmp=1}
-   if(zp.some(z=>{const d=(z.x-s.x)*dir;return d>10&&d<30&&z.u>.2&&z.u<.95}))go=0}
-  s.vx=go*34;if(jmp){s.vy=-jv;s.vx=dir*80}
-  s.sk2=(dir&&!go&&!jmp)?(s.sk2||0)+dt:0;if(s.sk2>1.2){s.rv=1.8;s.sk2=0}}
+   if(zp.some(z=>{const d=(z.x-s.x)*dir;return d>10&&d<30&&z.u>.2&&z.u<.95}))go=0,zw=1}
+  s.vx=go*34;if(jmp){s.vy=-jv;s.vx=dir*110}
+  s.sk2=(dir&&!go&&!jmp&&!zw)?(s.sk2||0)+dt:0;if(s.sk2>1.5){s.vy=-440;s.vx=dir*110;s.sk2=0}}
  const sg=Math.sign(s.vx),nx=s.x+s.vx*dt,oy=s.y;
  if(!(sg&&at(nx+sg*7,s.y-22,s.y-3)))s.x=Math.max(10,Math.min(L.w-10,nx));
  s.vy=Math.min(s.vy+800*dt,400);s.y+=s.vy*dt;
