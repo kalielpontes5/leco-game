@@ -459,14 +459,15 @@ const MT=[
 {b:84,n:32,r:60,sc:[0,2,4,7,9],ch:[[0,0],[7,0],[9,1],[5,0],[0,0],[7,0],[5,0],[7,0]],lw:'triangle',lv:.09,ld:.5,bw:'sine',bv:.14,bp:0,aw:'sine',av:.045,ar:4,pw:'sine',pv:.04,kt:1,sd:97},
 {b:120,n:32,r:60,am:1,ch:[[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2]],sd:97}];
 const mf=m=>440*Math.pow(2,(m-69)/12),mh=(a,b,c,d)=>{let h=Math.imul(a,374761393)^Math.imul(b,668265263)^Math.imul(c,2147483647)^Math.imul(d,1274126177);h=Math.imul(h^(h>>>13),1274126177);return(h^(h>>>16))>>>0};
-function heliPass(t){const d=15+Math.random()*5,dr=Math.random()<.5?-1:1,x=AC.createBufferSource(),lp=AC.createBiquadFilter(),ch=AC.createGain(),lf=AC.createOscillator(),lg=AC.createGain(),en=AC.createGain(),pn=AC.createStereoPanner(),ru=AC.createOscillator(),rl=AC.createBiquadFilter(),rg=AC.createGain();
+function heliPass(t){const d=13,dr=Math.random()<.5?-1:1,x=AC.createBufferSource(),lp=AC.createBiquadFilter(),ch=AC.createGain(),lf=AC.createOscillator(),lg=AC.createGain(),en=AC.createGain(),pn=AC.createStereoPanner(),ru=AC.createOscillator(),rl=AC.createBiquadFilter(),rg=AC.createGain();
  x.buffer=nzB(2);x.loop=true;lp.type='lowpass';lp.frequency.value=650;ch.gain.value=.4;lf.type='sine';lg.gain.value=.6;lf.frequency.setValueAtTime(10.4,t);lf.frequency.linearRampToValueAtTime(11.6,t+d*.45);lf.frequency.linearRampToValueAtTime(9.4,t+d);lf.connect(lg);lg.connect(ch.gain);
  ru.type='sawtooth';ru.frequency.value=46;rl.type='lowpass';rl.frequency.value=220;rg.gain.value=1.4;
- en.gain.setValueAtTime(.0001,t);en.gain.linearRampToValueAtTime(.3,t+d*.5);en.gain.linearRampToValueAtTime(.0001,t+d);
+ en.gain.setValueAtTime(.0001,t);en.gain.linearRampToValueAtTime(.2,t+d*.5);en.gain.linearRampToValueAtTime(.0001,t+d);
  pn.pan.setValueAtTime(-.8*dr,t);pn.pan.linearRampToValueAtTime(.8*dr,t+d);
  x.connect(lp);lp.connect(ch);ch.connect(en);ru.connect(rl);rl.connect(rg);rg.connect(en);en.connect(pn);pn.connect(AC.destination);
  [x,lf,ru].forEach(o=>{o.start(t);o.stop(t+d+.1)});HA.push(en);if(HA.length>4)HA.shift()}
 function mkc(){if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(AC.destination)}return MK}
+function lowHp(){return !!(boss&&boss.on&&!boss.dead&&vict<=0&&php>0&&php<2)}
 function heartOut(){if(!HO){const c=AC.createDynamicsCompressor();c.threshold.value=-6;c.knee.value=0;c.ratio.value=20;c.connect(AC.destination);const g=AC.createGain();g.gain.value=2.4;g.connect(c);HO=g}return HO}
 function heartPulse(t){const o=(ty,f0,f1,tb,v,d)=>{const q=AC.createOscillator(),a=AC.createGain();q.type=ty;q.frequency.setValueAtTime(f0,t+tb);q.frequency.exponentialRampToValueAtTime(f1,t+tb+d);a.gain.setValueAtTime(.0001,t+tb);a.gain.linearRampToValueAtTime(v,t+tb+.008);a.gain.exponentialRampToValueAtTime(.0001,t+tb+d+.12);q.connect(a);a.connect(heartOut());q.start(t+tb);q.stop(t+tb+d+.2)},n=(tb,v,fq,d)=>{const x=AC.createBufferSource(),q=AC.createBiquadFilter(),a=AC.createGain();x.buffer=nzB(d);q.type='lowpass';q.frequency.value=fq;a.gain.setValueAtTime(v,t+tb);a.gain.exponentialRampToValueAtTime(.0001,t+tb+d);x.connect(q);q.connect(a);a.connect(heartOut());x.start(t+tb)},u=.2;
  o('sine',100,48,0,.7,.2);o('triangle',200,95,0,.6,.14);o('triangle',330,130,0,.35,.09);n(0,.7,900,.12);
@@ -476,8 +477,8 @@ function heartSting(t){const o=(ty,f0,f1,d,v,fl)=>{const q=AC.createOscillator()
  o('sawtooth',466,233,2.4,.3,1800);o('sawtooth',494,247,2.4,.28,1800);o('sine',1865,932,2.4,.12,4000);o('sawtooth',58,52,2.6,.35,200);
  const x=AC.createBufferSource(),q=AC.createBiquadFilter(),a=AC.createGain();x.buffer=nzB(2.4);q.type='bandpass';q.Q.value=2;q.frequency.setValueAtTime(400,t);q.frequency.exponentialRampToValueAtTime(3200,t+2.2);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(.35,t+2.1);a.gain.linearRampToValueAtTime(0,t+2.4);x.connect(q);q.connect(a);a.connect(heartOut());x.start(t)}
 function sfxTick(){const t=AC.currentTime,pl=S.mode=='play'&&!mute;
- if(pl&&L.k==5&&!(boss&&boss.on)){if(t>=HP){heliPass(t);HP=t+5+Math.random()*6}}else if(HA.length){HA.forEach(a=>{a.gain.cancelScheduledValues(t);a.gain.setTargetAtTime(0,t,.3)});HA=[]}
- const hc=boss&&boss.on&&!boss.dead&&vict<=0&&chances>0&&chances<2;if(!hc)HS=0;else if(pl){if(!HS){HS=1;heartSting(t);MH=t+1.2}if(t>=MH){heartPulse(t);MH=t+.62}}}
+ if(pl&&L.k==5&&!(boss&&boss.on)){if(t>=HP){heliPass(t);HP=t+13+7+Math.random()*4}}else if(HA.length){HA.forEach(a=>{a.gain.cancelScheduledValues(t);a.gain.setTargetAtTime(0,t,.3)});HA=[]}
+ const hc=lowHp();if(!hc)HS=0;else if(pl){if(!HS){HS=1;heartSting(t);MH=t+1.2}if(t>=MH){heartPulse(t);MH=t+.62}}}
 function victBal(){if(MO||mute&&0)return;try{AC=AC||new AudioContext();if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(AC.destination)}
  const t0=AC.currentTime+.05,bt=60/108,g=AC.createGain();g.gain.setValueAtTime(.9,t0);g.gain.setValueAtTime(.9,t0+3);g.gain.linearRampToValueAtTime(.0001,t0+5.4);g.connect(MK);
  const nn=(w,m,tb,d,v,at)=>{const o=AC.createOscillator(),a=AC.createGain(),t=t0+tb*bt;o.type=w;o.frequency.value=mf(m);a.gain.setValueAtTime(.0001,t);a.gain.linearRampToValueAtTime(v,t+(at||.02));a.gain.exponentialRampToValueAtTime(.0001,t+d*bt);o.connect(a);a.connect(g);o.start(t);o.stop(t+d*bt+.05)};
@@ -527,7 +528,7 @@ function musTick(){if(!AC&&!GEST)return;try{AC=AC||new AudioContext();if(documen
  const want=MO?-1:musWant();
  if(want!=MC){if(MB){const o=MB;o.gain.cancelScheduledValues(AC.currentTime);o.gain.setTargetAtTime(0,AC.currentTime,.25);setTimeout(()=>{try{o.disconnect()}catch(e){}},1800)}
   if(MC>=0)MP[MC]=MS;MB=null;MC=want;MS=want>=0&&want!=9?((MP[want]||0)&~15):0;if(want>=0){if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(AC.destination)}MB=AC.createGain();MB.gain.setValueAtTime(0,AC.currentTime);MB.gain.linearRampToValueAtTime(.55*(MT[want].g||1),AC.currentTime+.8);MQ=AC.createGain();MB.connect(MQ);MQ.connect(MK);MN=AC.currentTime+.08}}
- if(!MB)return;if(MQ)MQ.gain.setTargetAtTime(MC==7?(S.mode=='play'&&chances>0&&chances<2?.06:.75):1,AC.currentTime,.5);const T=MT[MC],sd=60/T.b/4;while(MN<AC.currentTime+.35){try{musStep(T,MS,MN,sd)}catch(e){}MN+=sd;MS++}}catch(e){}}
+ if(!MB)return;if(MQ)MQ.gain.setTargetAtTime(MC==7?(S.mode=='play'&&lowHp()?.06:.75):1,AC.currentTime,.5);const T=MT[MC],sd=60/T.b/4;while(MN<AC.currentTime+.35){try{musStep(T,MS,MN,sd)}catch(e){}MN+=sd;MS++}}catch(e){}}
 addEventListener('pointerdown',()=>{GEST=1});addEventListener('keydown',()=>{GEST=1});setInterval(musTick,100);
 function jingle(n,t='square',d=.12,v=.06){if(mute)return;try{AC=AC||new AudioContext();const s0=AC.currentTime+.02;n.forEach((f,k)=>{if(!f)return;const o=AC.createOscillator(),a=AC.createGain(),b=s0+k*d;o.type=t;o.frequency.setValueAtTime(f,b);a.gain.setValueAtTime(v,b);a.gain.exponentialRampToValueAtTime(.001,b+d*.95);o.connect(a);a.connect(AC.destination);o.start(b);o.stop(b+d)})}catch(e){}}
 function restartBoss(){retryBoss();boss.hp=boss.max;chances=3}
