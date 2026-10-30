@@ -498,7 +498,7 @@ function swimEnd(){S.mode='panel';const fst=!S.lv['l1-riv'];S.lv['l1-riv']=1;if(
 function swimOver(){if(S.mode!='swim')return;S.mode='panel';sfx(120,.6,'sawtooth',60);panel('<h3>LECO SE AFOGOU</h3><p>As vidas acabaram no fundo do rio. As amostras coletadas nesta tentativa não foram salvas, mas o progresso da fase 2 continua intacto.</p>'+btn('swimGo()','TENTAR NOVAMENTE')+btn('swimLeave()','DEIXAR FASE')+btn('swimMenu()','MENU'))}
 function swimLeave(){close();sw=null;S.mode='play';Object.assign(P,{x:475,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:475,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;$('hs').textContent=L.n}
 function swimMenu(){sw=null;menu()}
-function swimOut(){const bx=sw&&sw.fst===false?475:735;close();sw=null;S.mode='play';Object.assign(P,{x:bx,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:bx,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;save()}
+function swimOut(){const bx=475;close();sw=null;S.mode='play';Object.assign(P,{x:bx,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:bx,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;save()}
 
 function swimDraw(){const w=sw,c=Math.round(w.cam),t=w.t,zi=x=>SWZ.some(z=>x>z[0]&&x<z[1]);g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;
  g.fillStyle='#a6c9c4';g.fillRect(0,0,384,22);g.fillStyle='#bcc6a6';g.fillRect(0,13,384,9);
@@ -736,7 +736,7 @@ let last=0;function loop(ts){{const wc=!!(boss&&boss.on&&!boss.dead);if(CB&&wc!=
 const JK=['w','arrowup'];
 function dn(k){k=k.toLowerCase();K[k]=1;
  if(k=='escape'){if(S.mode=='play')pauseP();else if(S.mode=='pause')resume();return}
- if(k=='enter'&&S.mode=='panel'){const b=$('o').querySelector('button.b:not([disabled])');if(b&&/GUARDAR PISTA/.test(b.textContent))b.click();return}
+ if(k=='enter'&&S.mode=='panel'){const b=$('o').querySelector('button.b:not([disabled])');if(b&&/GUARDAR PISTA|VOLTAR AO MAPA/.test(b.textContent))b.click();return}
  if(k=='f'&&S.mode=='swim'&&vis<=0&&visCd<=0){vis=5;sfx(700,.2,'sine',1200);return}
  if(S.mode=='cine'){if(k==' '||k=='e'||k=='enter')cineNext();return}if(S.mode!='play'||vict>0)return;if(JK.includes(k))jb=.12;if(k=='arrowdown')act();if(k=='f'&&!(boss&&boss.on)&&vis<=0&&visCd<=0){vis=5;sfx(700,.2,'sine',1200)}if(k==' ')tongue();if(k=='c'&&boss&&boss.on&&!boss.dead&&camT<=0&&camCd<=0){camT=camDur=(boss&&boss.on&&!boss.dead?4:3);sfx(250,.4,'sine',90)}if(k=='i')invP()}
 function up(k){k=k.toLowerCase();K[k]=0;if(JK.includes(k)&&P.vy<-90)P.vy*=.5}
