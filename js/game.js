@@ -130,14 +130,14 @@ const i=L.C.findIndex((c,j)=>c[2]==2&&!S.got[S.li+'-'+j]&&Math.abs(c[0]-P.x)<=re
  const wi=wk.findIndex(w=>!w.dead&&Math.abs(w.x-P.x)<=reach&&Math.abs(w.y-P.y)<34&&((w.x-P.x)*dir>=-8));if(wi>=0){const w=wk[wi];w.dead=1;tg=.28;tgT=-1;tongueTarget={x:w.x,y:w.y-5,type:'enemy'};tongueCooldown=.8;S.sc+=60;if(phaseStats)phaseStats.enemies++;burst(w.x,w.y-5,'#B8E85C',12);sfx(420,.22,'square',1200);toast('Língua certeira! Inimigo neutralizado. +60 pontos');save();return}
  const xi=foes.findIndex(s=>!s.dead&&Math.abs(s.x-P.x)<=reach+8&&Math.abs(s.y-P.y)<34&&((s.x-P.x)*dir>=-8));if(xi>=0){hitFoe(xi);return}
  tg=.22;tongueCooldown=.45;tongueTarget={x:P.x+dir*reach,y:P.y-12,type:'miss'};sfx(150,.1);toast('A língua alcança inimigos e pistas azuis. Aproxime-se e vire para o alvo.');}
-function conclude(){S.mode='panel';const key=phaseKey(S.li);if(S.answered[key]){panel(`<h3>Pergunta já respondida</h3><p>Você já registrou sua conclusão nesta fase. Agora colete ao menos 1 pista e vá até a saída. Pegar todas rende bônus e mais estrelas.</p>`+(S.li==5?btn('startBoss()','⚔ ENFRENTAR O VILÃO'):btn('resume()','CONTINUAR')));return}if(S.li==5&&!readyToQuestion()){panel(`<h3>Falta uma pista</h3><p>Colete ao menos 1 pista nas ruínas antes de responder.</p>`+btn('resume()','VOLTAR'));return}panel(`<h3>PERGUNTA DE INVESTIGAÇÃO</h3><p><b>${L.n}</b></p><p>${L.q}</p>`+L.o.map((o,i)=>btn('ans('+i+')',o)).join('<br>')+`<p><small>Responda no mapa e depois continue a exploração.</small></p>`+btn('resume()','PENSAR MAIS'))}
+function conclude(){S.mode='panel';const key=phaseKey(S.li);if(S.li==5&&foes.some(f=>!f.dead)){panel('<h3>CHEFÃO BLOQUEADO</h3><p>Derrote os fiscais do greenwashing desta fase (3 linguadas com Q em cada um) antes de enfrentar o vilão.</p>'+btn('resume()','VOLTAR'));return}if(S.answered[key]){panel(`<h3>Pergunta já respondida</h3><p>Você já registrou sua conclusão nesta fase. Agora colete ao menos 1 pista e vá até a saída. Pegar todas rende bônus e mais estrelas.</p>`+(S.li==5?btn('startBoss()','⚔ ENFRENTAR O VILÃO'):btn('resume()','CONTINUAR')));return}if(S.li==5&&!readyToQuestion()){panel(`<h3>Falta uma pista</h3><p>Colete ao menos 1 pista nas ruínas antes de responder.</p>`+btn('resume()','VOLTAR'));return}panel(`<h3>PERGUNTA DE INVESTIGAÇÃO</h3><p><b>${L.n}</b></p><p>${L.q}</p>`+L.o.map((o,i)=>btn('ans('+i+')',o)).join('<br>')+`<p><small>Responda no mapa e depois continue a exploração.</small></p>`+btn('resume()','PENSAR MAIS'))}
 function ans(i){
  const key=phaseKey(S.li),ok=i==L.ok,already=!!S.answered[key];
  if(!ok){if(phaseStats){phaseStats.damage++;phaseStats.pointsLost+=20}S.sc=Math.max(0,S.sc-20);S.cr=Math.max(0,S.cr-5);sfx(200,.3,'sawtooth');save();panel(`<h3>Quase! Reavalie as evidências</h3><p>${L.f[i]}</p><p>Você perdeu 5 pontos de credibilidade. A pergunta continua disponível no mapa.</p>`+btn('resume()','VOLTAR À EXPLORAÇÃO')+btn('conclude()','TENTAR OUTRA RESPOSTA'));return}
  if(!already){S.sc+=120;S.cr=Math.min(100,S.cr+10);S.ok++;S.answered[key]=true;if(!S.bd.includes(L.b))S.bd.push(L.b);sfx(880,.4,'square',1760)}
  save();const missing=Math.max(0,META[S.li]-phasePoints());panel(`<h3>ANÁLISE CORRETA!</h3><p>${L.f[i]}</p><p>+120 pontos · +10 credibilidade</p><p>${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos nesta fase.</p><p>${S.li==5?'O responsável pelo colapso aparece! Desvie dos ataques e use a língua (Q) quando a máscara abrir.':cnt(S.li)<1?'Colete ao menos 1 pista para liberar a saída.':'Vá até a saída, ou explore mais: todas as pistas rendem bônus e mais estrelas.'}</p>`+(S.li==5?btn('startBoss()','⚔ ENFRENTAR O VILÃO'):btn('resume()','CONTINUAR A FASE'))+btn('invP()','REVISAR PISTAS'))
 }
-function finishPhase(){const key=phaseKey(S.li);if(!readyToQuestion()||!S.answered[key]){panel(`<h3>SAÍDA BLOQUEADA</h3><p>Para concluir a fase, colete ao menos 1 das ${clueTotal(S.li)} pistas e responda corretamente à pergunta do mapa. Pegar todas as pistas dá bônus e mais estrelas.</p><p>Progresso: ${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos · ${S.answered[key]?'pergunta respondida':'pergunta pendente'}.</p>`+btn('resume()','CONTINUAR EXPLORANDO'));return}showPhaseResults()}
+function finishPhase(){const key=phaseKey(S.li);if(foes.some(f=>!f.dead)){panel('<h3>SAÍDA BLOQUEADA</h3><p>Derrote os fiscais do greenwashing desta fase (3 linguadas com Q em cada um) antes de sair pela porta.</p>'+btn('resume()','CONTINUAR EXPLORANDO'));return}if(!readyToQuestion()||!S.answered[key]){panel(`<h3>SAÍDA BLOQUEADA</h3><p>Para concluir a fase, colete ao menos 1 das ${clueTotal(S.li)} pistas e responda corretamente à pergunta do mapa. Pegar todas as pistas dá bônus e mais estrelas.</p><p>Progresso: ${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos · ${S.answered[key]?'pergunta respondida':'pergunta pendente'}.</p>`+btn('resume()','CONTINUAR EXPLORANDO'));return}showPhaseResults()}
 function starsFor(){const t=clueTotal(S.li),c=cnt(S.li),st=phaseStats||newStats(),lt=E[S.li].F.length,lv=Object.keys(S.lv).filter(k=>k.startsWith('l'+S.li+'-')).length;let n=1;if(c>=Math.ceil(t/2))n++;if(c>=t)n++;if(lt&&lv>=lt*.7)n++;if(st.damage<=2)n++;return Math.min(5,n)}
 function showPhaseResults(){jingle(WIN);const full=cnt(S.li)>=clueTotal(S.li);if(full){S.sc+=150;save()}const stt=phaseStats||newStats(),stars=starsFor();S.mode='panel';const html=`<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><h2>FASE ${S.li+1} CONCLUÍDA!</h2><p><b>${L.n}</b></p><div class="result-grid"><div><b>${cnt(S.li)}/${clueTotal(S.li)}</b><small>Pistas encontradas</small></div><div><b>${stt.leaves}</b><small>Folhas comidas</small></div><div><b>${stt.enemies}</b><small>Inimigos derrotados</small></div><div><b>${stt.damage}</b><small>Ataques / penalidades</small></div><div><b>−${stt.pointsLost}</b><small>Pontos perdidos</small></div><div><b>${phasePoints()}</b><small>Pontos da fase</small></div><div><b>${stt.deaths}</b><small>Quedas / mortes</small></div></div><p>${stars>=4?'Excelente investigação!':stars>=3?'Bom trabalho. Explore mais para conquistar todas as estrelas.':'Fase concluída! Tente evitar danos e encontrar mais evidências na próxima partida.'}</p>${full?'<p><b>BÔNUS: todas as pistas! +150 pontos</b></p>':''}<p><small>★ Estrelas: concluir · metade das pistas · todas as pistas · 70% das folhas · no máximo 2 danos.</small></p>`;panel(html+btn('advanceAfterResults()','CONTINUAR'))}
 function advanceAfterResults(){if(S.li<LV.length-1)fresh(S.li+1,0);else{S.fin=1;S.mode='end';save();endP()}}
@@ -279,13 +279,13 @@ function bg(l,cx){const k=l.k;g.drawImage(sky(l),0,0);
  if(k<4)for(let i=0;i<3;i++)g.drawImage(CL,Math.round(mod(i*150-cx*.08+T*3,470)-60),10+(i*17)%36);
  if(k==0){rep(80,.2,(x,n)=>{const h=64+mod(n*37,40),y=180-h;g.fillStyle=mixc(l.sk[1],'#c9a67a',.4);g.fillRect(x,y,70,h);g.fillStyle=mixc(l.sk[1],'#a88a5e',.5);g.fillRect(x,y,70,3);for(let j=0;j<h-20;j+=18)for(let i=0;i<3;i++){g.fillStyle=mixc(l.sk[1],'#7db8d8',.55);g.fillRect(x+8+i*20,y+12+j,10,10)}},cx);
   g.fillStyle='#5a3a24';g.fillRect(0,10,384,1);rep(16,.5,(x,n)=>{g.fillStyle=BC[mod(n,4)];for(let r=0;r<4;r++)g.fillRect(x+r,11+r,7-2*r,1)},cx);
-  rep(64,.5,(x,n)=>g.drawImage(STALL[mod(n,3)],x,118),cx);txt('ECO',mod(105-cx*.5,384),97)}
+  rep(64,.5,(x,n)=>g.drawImage(STALL[mod(n,3)],x,118),cx)}
  if(k==1){hills(cx,.1,128,12,mixc(l.hl,l.sk[1],.5),mixc(l.hl,l.sk[1],.7));
   rep(240,.3,(x,n)=>{g.fillStyle='#9fb4bd';g.fillRect(x,112,92,68);g.fillStyle='#7f98a4';g.fillRect(x,112,92,3);g.fillRect(x+70,115,22,65);for(let i=0;i<4;i++){g.fillStyle='#e8f4f8';g.fillRect(x+6+i*16,126,10,8)}[[x+10,76,10,38],[x+34,88,8,26]].forEach(([a,b,w,h],q)=>{g.fillStyle='#8a99a4';g.fillRect(a,b,w,h);g.fillStyle='#e2564b';g.fillRect(a,b,w,3);g.fillRect(a,b+8,w,3);for(let j=0;j<3;j++){g.globalAlpha=.55-j*.14;el(g,a+w/2+Math.round(Math.sin(T+j+q)*2),b-4-j*7-Math.floor((T*5+n*3)%7),3+j,3+j,'#f2f6f8')}g.globalAlpha=1})},cx);
-  hills(cx,.25,150,10,l.hl,mixc(l.hl,'#ffffff',.3));rep(44,.55,(x,n)=>g.drawImage(TR1,x,112+mod(n*5,8)),cx);water()}
+  hills(cx,.25,150,10,l.hl,mixc(l.hl,'#ffffff',.3));rep(44,.55,(x,n)=>g.drawImage(TR1,x,112+mod(n*5,8)),cx);g.save();g.beginPath();g.rect(0,180,384,36);g.clip();water();g.restore();g.fillStyle='#d6f6ff';g.fillRect(0,180,384,1)}
  if(k==2){rep(70,.25,(x,n)=>{const h=70+mod(n*37,50);g.fillStyle=mixc(l.sk[1],'#b9c9d6',.5);g.fillRect(x,180-h,58,h);for(let j=0;j<h-14;j+=14)for(let i=0;i<3;i++){g.fillStyle=mixc(l.sk[1],'#8fa8bb',.6);g.fillRect(x+7+i*16,188-h+j,7,7)}},cx);
-  rep(96,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,59,86,122);g.fillStyle='#f3e6c8';g.fillRect(x,60,84,120);g.fillStyle='#d9c7a0';g.fillRect(x,60,84,3);g.fillRect(x,126,84,2);for(let i=0;i<2;i++){g.fillStyle='#7aa6c4';g.fillRect(x+10+i*44,134,20,30);g.fillStyle='#b9dcf0';g.fillRect(x+12+i*44,136,6,12)}g.fillStyle='#8a5a38';for(let i=0;i<84;i+=6)g.fillRect(x+i,122,2,5);badge(x+42,92,mod(n,3))},cx);txt('SELOS?',48,76)}
- if(k==3){rep(50,.2,(x,n)=>g.drawImage(TRF,x,86+mod(n*7,3)*3),cx);rep(76,.45,(x,n)=>g.drawImage(TRM,x,64+mod(n*13,3)*3),cx);
+  rep(96,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,59,86,122);g.fillStyle='#f3e6c8';g.fillRect(x,60,84,120);g.fillStyle='#d9c7a0';g.fillRect(x,60,84,3);g.fillRect(x,126,84,2);for(let i=0;i<2;i++){g.fillStyle='#7aa6c4';g.fillRect(x+10+i*44,134,20,30);g.fillStyle='#b9dcf0';g.fillRect(x+12+i*44,136,6,12)}g.fillStyle='#8a5a38';for(let i=0;i<84;i+=6)g.fillRect(x+i,122,2,5);badge(x+42,92,mod(n,3))},cx)}
+ if(k==3){rep(50,.2,(x,n)=>g.drawImage(TRF,x,94+mod(n*7,3)*3),cx);rep(76,.45,(x,n)=>g.drawImage(TRM,x,64+mod(n*13,3)*3),cx);
   for(let i=0;i<4;i++){const x0=mod(i*110-cx*.25,470)-40;g.fillStyle='rgba(255,246,170,.10)';for(let y=0;y<180;y+=3)g.fillRect(x0+Math.round(y*.35),y,10+i*2,3)}
   for(let i=0;i<9;i++){const a=T*.4+i*.7;g.fillStyle=Math.sin(T*3+i)>.3?'#fff3a0':'rgba(255,243,160,.35)';g.fillRect(Math.round(mod(i*53-cx*.35+Math.sin(a)*10,400)-8),Math.round(110+(i*9)%50+Math.cos(a*1.3)*6),1,1)}}
 
@@ -296,7 +296,7 @@ function bg(l,cx){const k=l.k;g.drawImage(sky(l),0,0);
   rep(130,.7,(x,n)=>{for(let i=0;i<3;i++){const h=6+Math.round(Math.abs(Math.sin(T*9+i+n))*6);g.fillStyle='#e2564b';g.fillRect(x+i*5,180-h,4,h);g.fillStyle='#ff9b54';g.fillRect(x+i*5+1,180-h+3,2,h-3);g.fillStyle='#ffd45a';g.fillRect(x+i*5+1,180-Math.max(2,h-6),2,Math.max(2,h-6))}},cx);
   for(let i=0;i<26;i++){g.fillStyle=i&1?'#ffb347':'#d8d0c8';g.fillRect(Math.round(mod(i*37-cx*.6+Math.sin(T+i)*6,400)-8),Math.round(mod(T*(18+(i%5)*6)+i*23,216)),1,1)}}
  if(k==4){g.fillStyle=mixc(l.sk[1],'#d8cdb5',.5);g.fillRect(0,0,384,180);g.fillStyle='#cdbf9f';for(let x=0;x<384;x+=32)g.fillRect(x,0,1,180);g.fillStyle='#b5c7d5';g.fillRect(0,0,384,14);g.fillStyle='#e6c25a';g.fillRect(0,14,384,2);
-  rep(100,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,39,58,142);g.fillStyle='#e9eef2';g.fillRect(x,40,56,140);g.fillStyle='#b7c9d6';g.fillRect(x+44,40,12,140);g.fillStyle='#fff';g.fillRect(x+2,40,3,140);g.fillStyle='#e6c25a';g.fillRect(x,56,56,4);g.fillRect(x,150,56,4);g.fillStyle='#7aa6c4';g.fillRect(x+14,68,28,50);g.fillStyle='#b9dcf0';g.fillRect(x+16,70,10,24);g.fillStyle='#e6c25a';g.fillRect(x+14,66,28,2)},cx);txt('RELATÓRIO',51,83)}
+  rep(100,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,39,58,142);g.fillStyle='#e9eef2';g.fillRect(x,40,56,140);g.fillStyle='#b7c9d6';g.fillRect(x+44,40,12,140);g.fillStyle='#fff';g.fillRect(x+2,40,3,140);g.fillStyle='#e6c25a';g.fillRect(x,56,56,4);g.fillRect(x,150,56,4);g.fillStyle='#7aa6c4';g.fillRect(x+14,68,28,50);g.fillStyle='#b9dcf0';g.fillRect(x+16,70,10,24);g.fillStyle='#e6c25a';g.fillRect(x+14,66,28,2)},cx)}
 }
 function plat(l,x,y,w,h,wx){x=Math.round(x);y=Math.round(y);if(x>384||x+w<0)return;const M=MAT[l.k];
  for(let j=0;j<h;j+=16){const hh=Math.min(16,h-j);for(let i=0;i<w;i+=16){const ww=Math.min(16,w-i);g.drawImage(M.B,0,0,ww,hh,x+i,y+j,ww,hh)}}
@@ -464,30 +464,39 @@ function sAt(x,a,b){return st.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a)}
 function walkAI(s,dt){
  if(!s.seen){s.x+=s.d*26*dt;if(s.x>s.b)s.d=-1;if(s.x<s.a)s.d=1;return}
  s.hx=s.hx||s.x;s.vy=s.vy||0;s.vx=s.vx||0;
- const sf=st.concat(vs.filter(r=>r.v.mode||((lt+r.v.off)%r.v.per)<r.v.per-r.v.hid-1.2||(s.vy==0&&s.x>r[0]&&s.x<r[0]+r[2]&&Math.abs(r[1]-s.y)<2)),mv.map(m=>[m.x,m.y,m.w,8])),
+ const sf=st.concat(vs.filter(r=>r.v.mode||((lt+r.v.off)%r.v.per)<r.v.per-r.v.hid-1.2||
+  (s.vy==0&&s.x>r[0]&&s.x<r[0]+r[2]&&Math.abs(r[1]-s.y)<2)),mv.map(m=>[m.x,m.y,m.w,8])),
   at=(x,a,b)=>sf.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a),
-  tp=(x,a,b)=>{let t=null;sf.forEach(q=>{if(x>q[0]&&x<q[0]+q[2]&&q[1]>=a&&q[1]<=b&&(t==null||q[1]<t))t=q[1]});return t},
+  tp=(x,a,b)=>{let t=null;sf.forEach(q=>{if(x>q[0]&&x<q[0]+q[2]&&q[1]>=a&&q[1]<=b&&
+   (t==null||q[1]<t))t=q[1]});return t},
   og=s.vy==0&&at(s.x,s.y+.5,s.y+3);
  let dir=P.x>s.x+4?1:P.x<s.x-4?-1:(Math.abs(P.y-s.y)>24?(s.d||1):0);
  if(og){let go=dir,jmp=0,jv=240,zw=0;
-  if(dir){const ax=s.x+dir*9,wl=sf.filter(q=>ax>q[0]&&ax<q[0]+q[2]&&q[1]<s.y-3&&q[1]+q[3]>s.y-22),
+  if(dir){const ax=s.x+dir*9,
+    wl=sf.filter(q=>ax>q[0]&&ax<q[0]+q[2]&&q[1]<s.y-3&&q[1]+q[3]>s.y-22),
     jvf=t=>Math.min(300,Math.max(240,Math.sqrt(1600*(Math.max(0,s.y-t)+8)))),
     rch=(k,t)=>{const v=jvf(t);return k<=80*(v+Math.sqrt(Math.max(0,v*v-1600*(s.y-t))))/800*.85},
     spk=(x,t)=>sk.some(q=>x>q[0]-6&&x<q[0]+q[2]+6&&Math.abs(q[1]-t)<8),
-    fd=(a,b,ks)=>{for(const k of ks){const x=s.x+dir*k,t=tp(x,a,b);if(t!=null&&!at(x,t-22,t-2)&&!spk(x,t)&&rch(k,t))return t}return null};
-   if(wl.length){const h=s.y-Math.min(...wl.map(q=>q[1]));if(h<=48){jmp=1;jv=jvf(s.y-h)}else go=0}
-   else if(!at(s.x+dir*10,s.y+.5,s.y+3)){const dx=s.x+dir*18,dt2=P.y>s.y+10?tp(dx,s.y+3,190):null;
-    if(dt2!=null&&!spk(dx,dt2))go=dir;else{const t=fd(s.y-50,s.y+14,[14,22,30,38]);if(t!=null){jmp=1;jv=jvf(t)}else go=0}}
+    fd=(a,b,ks)=>{for(const k of ks){const x=s.x+dir*k,t=tp(x,a,b);
+     if(t!=null&&!at(x,t-22,t-2)&&!spk(x,t)&&rch(k,t))return t}return null};
+   if(wl.length){const h=s.y-Math.min(...wl.map(q=>q[1]));
+    if(h<=48){jmp=1;jv=jvf(s.y-h)}else go=0}
+   else if(!at(s.x+dir*10,s.y+.5,s.y+3)){const dx=s.x+dir*18,
+    dt2=P.y>s.y+10?tp(dx,s.y+3,190):null;
+    if(dt2!=null&&!spk(dx,dt2))go=dir;
+    else{const t=fd(s.y-50,s.y+14,[14,22,30,38]);if(t!=null){jmp=1;jv=jvf(t)}else go=0}}
    else{const t=P.y<s.y-14?fd(s.y-54,s.y-6,[10,18,26,34]):null;
     if(t!=null){jmp=1;jv=jvf(t)}
     else if(sk.some(k=>Math.abs(k[1]-s.y)<5&&s.x+dir*12>k[0]-2&&s.x+dir*12<k[0]+k[2]+2))jmp=1}
    if(zp.some(z=>{const d=(z.x-s.x)*dir;return d>10&&d<30&&z.u>.2&&z.u<.95}))go=0,zw=1}
   s.vx=go*34;if(jmp){s.vy=-jv;s.vx=dir*80}
-  s.sk2=(dir&&!go&&!jmp&&!zw)?(s.sk2||0)+dt:0;if(s.sk2>1.5){s.vy=-300;s.vx=dir*80;s.sk2=0}}
+  s.sk2=(dir&&!go&&!jmp&&!zw)?(s.sk2||0)+dt:0;
+  if(s.sk2>1.5){s.vy=-300;s.vx=dir*80;s.sk2=0}}
  const sg=Math.sign(s.vx),nx=s.x+s.vx*dt,oy=s.y;
  if(!(sg&&at(nx+sg*7,s.y-22,s.y-3)))s.x=Math.max(10,Math.min(L.w-10,nx));
  s.vy=Math.min(s.vy+800*dt,400);s.y+=s.vy*dt;
- if(s.vy>=0){const q=sf.find(q=>s.x>q[0]&&s.x<q[0]+q[2]&&q[1]>=oy-1&&q[1]<=s.y);if(q){s.y=q[1];s.vy=0}}
+ if(s.vy>=0){const q=sf.find(q=>s.x>q[0]&&s.x<q[0]+q[2]&&q[1]>=oy-1&&q[1]<=s.y);
+  if(q){s.y=q[1];s.vy=0}}
  else if(at(s.x,s.y-30,s.y-24))s.vy=.01;
  if(s.y>215){s.x=s.hx;s.y=180;s.vy=s.vx=0}}
 function foeStep(dt){if(!foes.length)return;sealFx&&(sealFx.t-=dt)>0||(sealFx=null);
