@@ -118,7 +118,7 @@ function enter(i){bossOnly=0;boss=null;bp=[];php=5;drops=[];dropT=0;pwR=pwS=ligh
  st=L.P.concat(e.P||[]);hz=L.H.map(h=>({x:h[0],a:h[0],b:h[1],y:h[2],d:1})).map(o=>clipRun(o,o.y,o.y+10,7)).filter(Boolean);
  mv=(e.M||[]).filter(m=>m[4]>0).map(m=>({ox:m[0],oy:m[1],x:m[0],y:m[1],w:m[2],ax:m[3],r:m[4],s:m[5],dx:0,dy:0,mv:1}));
  sk=(e.S||[]).filter(s=>s[2]>0);wk=(e.W||[]).map(w=>({a:w[0],b:w[1],y:w[2],x:w[0],d:1,dead:0})).map(o=>clipRun(o,o.y-12,o.y-1,6)).filter(Boolean);dr=(e.D||[]).map((d,j)=>({x:d[0],p:d[1],o:j*.9}));vp=(e.V||[]).map(v=>{const o={x:v[0],y:v[1],w:v[2],per:v[3]||4,off:v[4]||0,mode:v[5]||0,hid:v[6]||1.2,vis:1,warn:0,t:0,h:0};o.r=[o.x,o.y,o.w,8];o.r.v=o;return o});zp=(e.Z||[]).map(z=>({x:z[0],per:z[1]||3,kind:z[2]||0,off:z[3]||0,u:0,y:14,h:0}));vs=vp.map(v=>v.r);
- lf=(e.F||[]).map((f,j)=>({x:f[0],y:f[1],k:'l'+i+'-'+j})).filter(f=>!S.lv[f.k]);pt=[];spawnFoes();S.mode='play';$('h').style.display='flex';document.body.classList.remove('mn');fit();close();save();toast(L.m+' — '+L.t,6000)}
+ lf=(e.F||[]).map((f,j)=>({x:f[0],y:f[1],k:'l'+i+'-'+j})).filter(f=>!S.lv[f.k]);pt=[];spawnFoes();if(S.li==5)hz=[];S.mode='play';$('h').style.display='flex';document.body.classList.remove('mn');fit();close();save();toast(L.m+' — '+L.t,6000)}
 function clipRun(o,y0,y1,hw){const free=x=>!st.some(p=>x+hw>p[0]&&x-hw<p[0]+p[2]&&p[1]<y1&&p[1]+p[3]>y0);let bs=0,bl=0,s=null;for(let x=o.a;x<=o.b+1;x++){const f=x<=o.b&&free(x);if(f&&s==null)s=x;if(!f&&s!=null){if(x-1-s>bl){bl=x-1-s;bs=s}s=null}}if(bl<14)return null;o.a=bs;o.b=bs+bl;o.x=bs;o.d=1;return o}
 const burst=(x,y,c,n=8)=>{for(let j=0;j<n;j++)pt.push({x,y,vx:(Math.random()-.5)*90,vy:-Math.random()*80,l:.5,c})};
 function collect(i){const k=S.li+'-'+i;if(S.got[k]||!L.C[i]||L.C[i][2]===3)return;
@@ -162,7 +162,7 @@ function step(dt){lt+=dt;sh=Math.max(0,sh-dt);
  sk.forEach(([x,y,w])=>{if(P.x+5>x&&P.x-5<x+w&&P.y>y-6&&P.y-13<y)hurt('Espinhos! Pule por cima.')});
  wk.forEach(w=>{if(w.dead)return;w.x+=w.d*(40+S.li*8)*dt;if(w.x>w.b)w.d=-1;if(w.x<w.a)w.d=1;
   if(Math.abs(P.x-w.x)<10&&P.y>w.y-12&&P.y-13<w.y){if(P.vy>40&&P.y<w.y-4){w.dead=1;P.vy=-210;P.dj=0;S.sc+=50;if(phaseStats)phaseStats.enemies++;burst(w.x,w.y-5,'#6C7F95',10);sfx(400,.15,'square',800)}else hurt('Um poluente! Pule na cabeça dele.')}});
- dr.forEach(d=>{const u=((lt+d.o)%d.p)/d.p;d.u=u;d.y=u<.55?4+176*Math.pow(u/.55,2):-9;if(d.y>0&&Math.abs(P.x-d.x)<6&&P.y-6>d.y-8&&P.y-6<d.y+6)hurt('Gota tóxica!')});
+ dr.forEach(d=>{const u=((lt+d.o)%d.p)/d.p;d.u=u;d.y=u<.55?4+176*Math.pow(u/.55,2):-9;if(d.y>0){let cp=180;st.concat(vs,mv.map(m=>[m.x,m.y,m.w,8])).forEach(q=>{if(d.x>q[0]&&d.x<q[0]+q[2]&&q[1]>=4&&q[1]<cp)cp=q[1]});if(d.y>=cp)d.y=-9}if(d.y>0&&Math.abs(P.x-d.x)<6&&P.y-6>d.y-8&&P.y-6<d.y+6)hurt('Gota tóxica!')});
  bossStep(dt);extraStep(dt);if(S.li==5&&!boss&&vict<=0&&Math.random()<dt*.15)sh=.18;
  lf=lf.filter(f=>{if(Math.hypot(f.x-P.x,f.y-(P.y-8))<11){S.lv[f.k]=1;S.sc+=25;if(phaseStats)phaseStats.leaves++;burst(f.x,f.y,'#9BE15D',6);joy=.5;sfx(900,.1,'sine',1400);return false}return true});
  if(tg>0){tg-=dt;if(tg<=0&&tgT!=null){if(tgT>=0)collect(tgT);tgT=null;tongueTarget=null}}
@@ -495,7 +495,7 @@ function foeStep(dt){if(!foes.length)return;sealFx&&(sealFx.t-=dt)>0||(sealFx=nu
   if(act&&!s.seen){s.seen=1;toast(FOE[s.t].intro,6500)}
   if(act){s.cd-=dt;s.wind=s.cd<.45?1:0;if(s.cd<=0){foeShot(s);s.cd=FOE[s.t].per;if(s.t==2)s.bt=.38}}else{s.wind=0;s.cd=Math.max(s.cd,.9)}
   if(s.bt>0){s.bt-=dt;if(s.bt<=0)foeShot(s)}
-  if(d<11&&P.y>s.y-20&&P.y-13<s.y){if(P.vy>40&&P.y<s.y-12){P.vy=-190;P.dj=0;sfx(380,.1,'square',700)}else hurt('Um fiscal do greenwashing! Use a língua (Q) à distância.')}});
+  if(d<11&&P.y>s.y-20&&P.y-13<s.y){if(inv>0||(P.vy>40&&P.y<s.y-12)){const sd=P.x>=s.x?1:-1;P.x=s.x+sd*11.5;if(P.vx*sd<0)P.vx=0}else hurt('Um fiscal do greenwashing! Use a língua (Q) à distância.')}});
  shots=shots.filter(p=>{p.t+=dt;p.x+=p.vx*dt;p.vy+=p.g*dt;p.y=p.k==0?(p.y0+=p.vy*dt)+Math.sin(p.t*6)*8:p.y+p.vy*dt;const r=p.k==2?4+Math.min(2,p.t):4;
   if(p.t>6||p.x<cam-40||p.x>cam+424||p.y>206||p.y<-20)return false;
   if(st.concat(vs,mv.map(m=>[m.x,m.y,m.w,8])).some(q=>p.x>q[0]&&p.x<q[0]+q[2]&&p.y>q[1]&&p.y<q[1]+q[3])){burst(p.x,p.y,['#fff8e6','#e2564b','#8b99a6','#6fbf4a','#7b5cff'][p.k]||'#fff',6);return false}
