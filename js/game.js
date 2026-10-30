@@ -390,7 +390,7 @@ function danceLeco(x,y){const t=T*7.5,s=Math.sin(t),fl=Math.sin(t*.5)>=0?1:-1,c=
  g.fillStyle='#5b8fd0';g.fillRect(6,-4,2,1);g.fillRect(10,-3,1,1);g.fillStyle='#fff';g.fillRect(7,-5,1,1);
  g.restore();
  for(let i=0;i<3;i++){const u=(T*.9+i/3)%1;g.globalAlpha=1-u;note(Math.round(x+(i-1)*16+Math.sin(T*3+i)*4),Math.round(y-34-u*30),BC[i]);g.globalAlpha=1}}
-function abyss(l,cx){if(l.k==1)return;if(l.k==3){water();return}const b=l.gr,n=9;for(let i=0;i<n;i++){g.fillStyle=mixc(b,'#10141a',.45+.45*i/(n-1));g.fillRect(0,180+i*4,384,4)}
+function abyss(l,cx){if(l.k==1)return;if(l.k==3){g.save();g.beginPath();g.rect(0,180,384,36);g.clip();water();g.restore();g.fillStyle='#d6f6ff';g.fillRect(0,180,384,1);return}const b=l.gr,n=9;for(let i=0;i<n;i++){g.fillStyle=mixc(b,'#10141a',.45+.45*i/(n-1));g.fillRect(0,180+i*4,384,4)}
  rep(34,.5,(x,n)=>{const w=10+mod(n*7,14),h=3+mod(n*5,6),y=184+mod(n*13,22);g.fillStyle=mixc(b,'#10141a',.8);g.fillRect(x,y,w,h);g.fillStyle=mixc(b,'#10141a',.62);g.fillRect(x,y,w,1)},cx);
  g.fillStyle='rgba(0,0,0,.25)';g.fillRect(0,180,384,2)}
 // ---------- VIDAS, CHANCES E OBSTÁCULOS NOVOS ----------
@@ -451,13 +451,13 @@ function spawnFoes(){foes=[];shots=[];sealFx=null;if(S.li<3||bossOnly)return;
  const PL={3:[[0,.62]],4:[[1,.36],[3,.86]],5:[[2,.3],[4,.76]]}[S.li],gs0=st.filter(p=>p[1]==180&&p[3]>=36&&p[2]>=110&&p[0]>120).map(p=>({p,c:Math.round(p[0]+p[2]/2)}));
  PL.forEach(([t,fr],j)=>{const tx=L.w*fr,lim=S.li==5?L.w-80:S.li==4?L.w-140:L.w,gs=gs0.filter(o=>o.c<=lim&&!foes.some(q=>Math.abs(q.x-o.c)<160));
   const ok=gs.filter(o=>!sk.some(k=>Math.abs(k[0]-o.c)<45)&&!wk.some(w=>w.y==180&&w.a<o.c+25&&w.b>o.c-25)&&!dr.some(d=>Math.abs(d.x-o.c)<30)&&!zp.some(z=>Math.abs(z.x-o.c)<30)&&Math.abs(o.c-(L.qx||-999))>45);
-  const pk=(ok.length?ok:gs).sort((a,b)=>Math.abs(a.c-tx)-Math.abs(b.c-tx))[0];if(!pk)return;
+  const fx=S.li==3?st.find(q=>q[0]==1010&&q[1]==180&&q[2]==90):null,pk=fx?{p:fx,c:1060}:(ok.length?ok:gs).sort((a,b)=>Math.abs(a.c-tx)-Math.abs(b.c-tx))[0];if(!pk)return;
   const key='l'+S.li+'-e'+j,o={x:pk.c,y:180,t:t,hp:3,flash:0,cd:1.4,wind:0,bt:0,f:-1,seen:0,k:key,dead:!!S.lv[key],a:pk.p[0]+16,b:pk.p[0]+pk.p[2]-16,d:1};
   st=st.filter(q=>!(q[1]<180&&q[1]+q[3]>=179&&o.x+9>q[0]&&o.x-9<q[0]+q[2]));
   if(t>=3){const fr=x=>!st.some(q=>x+7>q[0]&&x-7<q[0]+q[2]&&q[1]<179&&q[1]+q[3]>154);let a=o.x,b=o.x;while(a>o.a&&fr(a-1))a--;while(b<o.b&&fr(b+1))b++;o.a=a;o.b=b}
-  foes.push(o)})}
+  if(S.li==3)hz=hz.filter(h=>h.b<o.x-80||h.a>o.x+80);foes.push(o)})}
 function foeShot(s){const k=s.t,y=s.y-12,f=s.f;sfx(k==1?260:k==2?140:520,.12,'square',k==2?90:760);
- if(k==0)shots.push({k:0,x:s.x+f*10,y:y,y0:y,vx:f*88,vy:0,g:0,t:0});
+ if(k==0){const ay=Math.max(-70,Math.min(70,((P.y-9)-y)/(Math.max(40,Math.abs(P.x-s.x))/88)));shots.push({k:0,x:s.x+f*10,y:y,y0:y,vx:f*88,vy:ay,g:0,t:0})}
  else if(k==1){const d=Math.abs(P.x-s.x);shots.push({k:1,x:s.x+f*8,y:y-4,vx:f*Math.max(48,Math.min(118,d*.55)),vy:-125,g:260,t:0})}
  else if(k==2)shots.push({k:2,x:s.x+f*12,y:y,vx:f*68,vy:0,g:0,t:0});else{const tx=P.x-s.x,ty=(P.y-9)-y,dl=Math.hypot(tx,ty)||1,sp=k==3?82:92;shots.push({k:k,x:s.x+f*10,y:y,vx:tx/dl*sp,vy:ty/dl*sp,g:0,t:0})}shots[shots.length-1].m=FOE[k].msg}
 function sAt(x,a,b){return st.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a)}
@@ -484,7 +484,7 @@ function foeStep(dt){if(!foes.length)return;sealFx&&(sealFx.t-=dt)>0||(sealFx=nu
   if(act){s.cd-=dt;s.wind=s.cd<.45?1:0;if(s.cd<=0){foeShot(s);s.cd=FOE[s.t].per;if(s.t==2)s.bt=.38}}else{s.wind=0;s.cd=Math.max(s.cd,.9)}
   if(s.bt>0){s.bt-=dt;if(s.bt<=0)foeShot(s)}
   if(d<11&&P.y>s.y-20&&P.y-13<s.y){if(P.vy>40&&P.y<s.y-12){P.vy=-190;P.dj=0;sfx(380,.1,'square',700)}else hurt('Um fiscal do greenwashing! Use a língua (Q) à distância.')}});
- shots=shots.filter(p=>{p.t+=dt;p.x+=p.vx*dt;p.vy+=p.g*dt;p.y=p.k==0?p.y0+Math.sin(p.t*6)*8:p.y+p.vy*dt;const r=p.k==2?4+Math.min(2,p.t):4;
+ shots=shots.filter(p=>{p.t+=dt;p.x+=p.vx*dt;p.vy+=p.g*dt;p.y=p.k==0?(p.y0+=p.vy*dt)+Math.sin(p.t*6)*8:p.y+p.vy*dt;const r=p.k==2?4+Math.min(2,p.t):4;
   if(p.t>6||p.x<cam-40||p.x>cam+424||p.y>206||p.y<-20)return false;
   if(st.concat(vs,mv.map(m=>[m.x,m.y,m.w,8])).some(q=>p.x>q[0]&&p.x<q[0]+q[2]&&p.y>q[1]&&p.y<q[1]+q[3])){burst(p.x,p.y,['#fff8e6','#e2564b','#8b99a6','#6fbf4a','#7b5cff'][p.k]||'#fff',6);return false}
   if(camT<=0&&inv<=0&&Math.abs(P.x-p.x)<6+r&&P.y-14<p.y+r&&P.y>p.y-r){hurt(p.m||'Tiro do greenwashing!');return false}
