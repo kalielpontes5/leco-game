@@ -137,7 +137,7 @@ function ans(i){
  if(!already){S.sc+=120;S.cr=Math.min(100,S.cr+10);S.ok++;S.answered[key]=true;if(!S.bd.includes(L.b))S.bd.push(L.b);sfx(880,.4,'square',1760)}
  save();const missing=Math.max(0,META[S.li]-phasePoints());panel(`<h3>ANÁLISE CORRETA!</h3><p>${L.f[i]}</p><p>+120 pontos · +10 credibilidade</p><p>${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos nesta fase.</p><p>${S.li==5?'O responsável pelo colapso aparece! Desvie dos ataques e use a língua (Q) quando a máscara abrir.':cnt(S.li)<1?'Colete ao menos 1 pista para liberar a saída.':'Vá até a saída, ou explore mais: todas as pistas rendem bônus e mais estrelas.'}</p>`+(S.li==5?btn('startBoss()','⚔ ENFRENTAR O VILÃO'):btn('resume()','CONTINUAR A FASE'))+btn('invP()','REVISAR PISTAS'))
 }
-function finishPhase(){const key=phaseKey(S.li);if(foes.some(f=>!f.dead)){panel('<h3>SAÍDA BLOQUEADA</h3><p>Derrote os fiscais do greenwashing desta fase (3 linguadas com Q em cada um) antes de sair pela porta.</p>'+btn('resume()','CONTINUAR EXPLORANDO'));return}if(!readyToQuestion()||!S.answered[key]){panel(`<h3>SAÍDA BLOQUEADA</h3><p>Para concluir a fase, colete ao menos 1 das ${clueTotal(S.li)} pistas e responda corretamente à pergunta do mapa. Pegar todas as pistas dá bônus e mais estrelas.</p><p>Progresso: ${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos · ${S.answered[key]?'pergunta respondida':'pergunta pendente'}.</p>`+btn('resume()','CONTINUAR EXPLORANDO'));return}showPhaseResults()}
+function finishPhase(){const key=phaseKey(S.li);if(S.li==1&&!S.lv.riv1){panel('<h3>SAÍDA SELADA</h3><p>A saída da fábrica só abre para quem trouxer as amostras do fundo do rio. Caia em qualquer abismo da fase para mergulhar e começar a missão no Rio Esquecido.</p>'+btn('resume()','CONTINUAR EXPLORANDO'));return}if(foes.some(f=>!f.dead)){panel('<h3>SAÍDA BLOQUEADA</h3><p>Derrote os fiscais do greenwashing desta fase (3 linguadas com Q em cada um) antes de sair pela porta.</p>'+btn('resume()','CONTINUAR EXPLORANDO'));return}if(!readyToQuestion()||!S.answered[key]){panel(`<h3>SAÍDA BLOQUEADA</h3><p>Para concluir a fase, colete ao menos 1 das ${clueTotal(S.li)} pistas e responda corretamente à pergunta do mapa. Pegar todas as pistas dá bônus e mais estrelas.</p><p>Progresso: ${cnt(S.li)}/${clueTotal(S.li)} pistas · ${phasePoints()} pontos · ${S.answered[key]?'pergunta respondida':'pergunta pendente'}.</p>`+btn('resume()','CONTINUAR EXPLORANDO'));return}showPhaseResults()}
 function starsFor(){const t=clueTotal(S.li),c=cnt(S.li),st=phaseStats||newStats(),lt=E[S.li].F.length,lv=Object.keys(S.lv).filter(k=>k.startsWith('l'+S.li+'-')).length;let n=1;if(c>=Math.ceil(t/2))n++;if(c>=t)n++;if(lt&&lv>=lt*.7)n++;if(st.damage<=2)n++;return Math.min(5,n)}
 function showPhaseResults(){jingle(WIN);const full=cnt(S.li)>=clueTotal(S.li);if(full){S.sc+=150;save()}const stt=phaseStats||newStats(),stars=starsFor();S.mode='panel';const html=`<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><h2>FASE ${S.li+1} CONCLUÍDA!</h2><p><b>${L.n}</b></p><div class="result-grid"><div><b>${cnt(S.li)}/${clueTotal(S.li)}</b><small>Pistas encontradas</small></div><div><b>${stt.leaves}</b><small>Folhas comidas</small></div><div><b>${stt.enemies}</b><small>Inimigos derrotados</small></div><div><b>${stt.damage}</b><small>Ataques / penalidades</small></div><div><b>−${stt.pointsLost}</b><small>Pontos perdidos</small></div><div><b>${phasePoints()}</b><small>Pontos da fase</small></div><div><b>${stt.deaths}</b><small>Quedas / mortes</small></div></div><p>${stars>=4?'Excelente investigação!':stars>=3?'Bom trabalho. Explore mais para conquistar todas as estrelas.':'Fase concluída! Tente evitar danos e encontrar mais evidências na próxima partida.'}</p>${full?'<p><b>BÔNUS: todas as pistas! +150 pontos</b></p>':''}<p><small>★ Estrelas: concluir · metade das pistas · todas as pistas · 70% das folhas · no máximo 2 danos.</small></p>`;panel(html+btn('advanceAfterResults()','CONTINUAR'))}
 function advanceAfterResults(){if(S.li<LV.length-1)fresh(S.li+1,0);else{S.fin=1;S.mode='end';save();endP()}}
@@ -156,7 +156,7 @@ function step(dt){lt+=dt;sh=Math.max(0,sh-dt);
  for(const m of mv)if(P.vy>=0&&P.x+6>m.x&&P.x-6<m.x+m.w&&py<=m.y+4&&P.y>=m.y&&P.y<=m.y+12){P.y=m.y;P.vy=0;P.og=1;P.sp=m}
  if(P.og){P.dj=0;if(!was){P.sq=.2;burst(P.x,P.y,'rgba(255,255,255,.7)',4)}if(!P.sp.mv&&!P.sp.v&&P.sp[2]>=40&&P.x>P.sp[0]+10&&P.x<P.sp[0]+P.sp[2]-10)safe={x:P.x,y:P.y}}
  P.sq*=Math.max(0,1-12*dt);
- if(P.y>250)die('Caiu! Voltando ao último ponto seguro.',1);
+ if(P.y>250&&S.li==1&&!S.lv.riv1&&S.mode=='play'){swimIntro()}else if(P.y>250)die('Caiu! Voltando ao último ponto seguro.',1);
  tongueCooldown=Math.max(0,tongueCooldown-dt);if(camT>0){camT-=dt;if(camT<=0)camCd=camMax=(boss&&boss.on?9:3)}else if(camCd>0)camCd-=dt;inv=Math.max(0,inv-dt);
  hz.forEach(h=>{h.x+=h.d*(46+S.li*8)*dt;if(h.x>h.b)h.d=-1;if(h.x<h.a)h.d=1;if(camT<=0&&Math.abs(h.x-P.x)<13&&P.y>h.y&&P.y-13<h.y+10)hurt('Drone de vigilância! Use C para se camuflar.')});
  sk.forEach(([x,y,w])=>{if(P.x+5>x&&P.x-5<x+w&&P.y>y-6&&P.y-13<y)hurt('Espinhos! Pule por cima.')});
@@ -282,7 +282,7 @@ function bg(l,cx){const k=l.k;g.drawImage(sky(l),0,0);
   rep(64,.5,(x,n)=>g.drawImage(STALL[mod(n,3)],x,118),cx)}
  if(k==1){hills(cx,.1,128,12,mixc(l.hl,l.sk[1],.5),mixc(l.hl,l.sk[1],.7));
   rep(240,.3,(x,n)=>{g.fillStyle='#9fb4bd';g.fillRect(x,112,92,68);g.fillStyle='#7f98a4';g.fillRect(x,112,92,3);g.fillRect(x+70,115,22,65);for(let i=0;i<4;i++){g.fillStyle='#e8f4f8';g.fillRect(x+6+i*16,126,10,8)}[[x+10,76,10,38],[x+34,88,8,26]].forEach(([a,b,w,h],q)=>{g.fillStyle='#8a99a4';g.fillRect(a,b,w,h);g.fillStyle='#e2564b';g.fillRect(a,b,w,3);g.fillRect(a,b+8,w,3);for(let j=0;j<3;j++){g.globalAlpha=.55-j*.14;el(g,a+w/2+Math.round(Math.sin(T+j+q)*2),b-4-j*7-Math.floor((T*5+n*3)%7),3+j,3+j,'#f2f6f8')}g.globalAlpha=1})},cx);
-  hills(cx,.25,150,10,l.hl,mixc(l.hl,'#ffffff',.3));rep(44,.55,(x,n)=>g.drawImage(TR1,x,112+mod(n*5,8)),cx);g.save();g.beginPath();g.rect(0,180,384,36);g.clip();water();g.restore();g.fillStyle='#d6f6ff';g.fillRect(0,180,384,1)}
+  hills(cx,.25,150,10,l.hl,mixc(l.hl,'#ffffff',.3));rep(44,.55,(x,n)=>g.drawImage(TR1,x,122+mod(n*5,8)),cx);g.save();g.beginPath();g.rect(0,180,384,36);g.clip();water();g.restore();g.fillStyle='#d6f6ff';g.fillRect(0,180,384,1)}
  if(k==2){rep(70,.25,(x,n)=>{const h=70+mod(n*37,50);g.fillStyle=mixc(l.sk[1],'#b9c9d6',.5);g.fillRect(x,180-h,58,h);for(let j=0;j<h-14;j+=14)for(let i=0;i<3;i++){g.fillStyle=mixc(l.sk[1],'#8fa8bb',.6);g.fillRect(x+7+i*16,188-h+j,7,7)}},cx);
   rep(96,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,59,86,122);g.fillStyle='#f3e6c8';g.fillRect(x,60,84,120);g.fillStyle='#d9c7a0';g.fillRect(x,60,84,3);g.fillRect(x,126,84,2);for(let i=0;i<2;i++){g.fillStyle='#7aa6c4';g.fillRect(x+10+i*44,134,20,30);g.fillStyle='#b9dcf0';g.fillRect(x+12+i*44,136,6,12)}g.fillStyle='#8a5a38';for(let i=0;i<84;i+=6)g.fillRect(x+i,122,2,5);badge(x+42,92,mod(n,3))},cx)}
  if(k==3){rep(50,.2,(x,n)=>g.drawImage(TRF,x,94+mod(n*7,3)*3),cx);rep(76,.45,(x,n)=>g.drawImage(TRM,x,64+mod(n*13,3)*3),cx);
@@ -437,6 +437,54 @@ function drawNew(){
    else if(u<.45&&((T*5+z.x)%1)<.3){g.fillStyle='rgba(255,255,255,.6)';g.fillRect(x-1,172-(((T*20)|0)%5),2,2)}}})}
 function papers(cx){for(let i=0;i<22;i++){const d=i%3,sc=[.12,.25,.42][d],sz=[3,4,6][d],al=[.28,.4,.55][d],sp=[7,12,19][d],x=Math.round(mod(i*47-cx*sc*.6+Math.sin(T*.7+i)*(8+d*4),420)-18),y=Math.round(mod(T*sp+i*29,236)-12),w=Math.max(1,Math.round(sz*Math.abs(Math.cos(T*(1.1+d*.4)+i))));
  g.globalAlpha=al;g.fillStyle='#fff6dc';g.fillRect(x,y,w,sz+1+d);if(d==2&&w>3){g.fillStyle='#b9ad8c';g.fillRect(x+1,y+2,w-2,1);g.fillRect(x+1,y+4,w-2,1)}}g.globalAlpha=1}
+// ---------- RIO ESQUECIDO: MISSÃO SUBAQUÁTICA (fase 2) ----------
+let sw=null;const SWL=1500,
+SWH=[['b',180,60,50,1.1],['o',330,100,45,1.3],['f',430,150,70,1.6],['b',520,110,40,1],['o',640,80,50,1.5],['f',720,60,80,1.4],['b',800,120,45,1.2],['o',960,140,45,1.2],['f',1020,100,80,1.7],['b',1090,160,40,1.1],['o',1230,70,50,1.4],['f',1290,120,80,1.5],['b',1370,100,45,1],['o',1450,150,40,1.3]],
+SWT=[[30,'LECO: QUE ÁGUA TURVA... ONDE ESTÃO AS AMOSTRAS?'],[400,'O PEIXE SELO ECO É VERDE SÓ NO RÓTULO!'],[880,'BARRIS BIODEGRADÁVEIS... CHEIOS DE SOLVENTE!'],[1250,'O PORTAL SE ABRE COM AS 5 AMOSTRAS NA MOCHILA.']],
+swP=(h,t)=>{const k=h[0],x=h[1],y=h[2],a=h[3],u=Math.sin(t*h[4]+x);return k=='o'?{x:x,y:y+u*a}:k=='b'?{x:x+u*a,y:y+Math.sin(t*.8+x)*4}:{x:x+u*a,y:y,d:Math.cos(t*h[4]+x)>=0?1:-1}},
+swSay=(m,n)=>{sw.msg=m;sw.mt=n};
+function swimIntro(){S.mode='panel';panel('<h3>O RIO ESQUECIDO</h3><p>Leco escorrega e cai nas águas barrentas do rio... mas o rio não está vazio.</p><p>Sob a superfície, a fábrica escondeu por anos frascos com amostras da água que despejava. Dona Rosa pediu: <b>colete as 5 amostras</b> e prove o que aconteceu.</p><p>Cuidado com barris de chorume, manchas de óleo e peixes-selo &quot;ECO&quot;. Nade com <b>A/D ou ◀ ▶</b>, suba com <b>Espaço</b>/<b>W</b> e desça com <b>S</b>. Com as 5 amostras, entre no portal.</p>'+btn('swimGo()','MERGULHAR'))}
+function swimGo(){close();S.mode='swim';sw={x:40,y:60,vx:0,vy:0,dir:1,got:0,hp:3,inv:1,cam:0,t:0,msg:'',mt:0,ck:40,sd:{},bb:[],it:[[260,120],[560,60],[860,150],[1130,90],[1380,160]].map(a=>({x:a[0],y:a[1],g:0}))};sfx(300,.4,'sine',90)}
+function swHit(k){const w=sw;w.hp--;w.inv=1.4;w.vx=-w.dir*90;w.vy=40;sfx(150,.3,'sawtooth');
+ if(w.hp<=0){w.hp=3;w.x=w.ck;w.y=60;w.vx=w.vy=0;w.inv=2;swSay('SEM FÔLEGO! VOCÊ BOIOU ATÉ O ÚLTIMO PONTO.',3)}
+ else swSay(k=='b'?'BARRIL DE CHORUME! CUIDADO!':k=='o'?'MANCHA DE ÓLEO! DESVIE!':'O PEIXE SELO ECO MORDEU!',2.5)}
+function swimStep(dt){const w=sw;w.t+=dt;w.mt=Math.max(0,w.mt-dt);w.inv=Math.max(0,w.inv-dt);
+ const ax=(K.d||K.arrowright?1:0)-(K.a||K.arrowleft?1:0),up=K[' ']||K.w||K.arrowup,dw=K.s||K.arrowdown;
+ if(ax)w.dir=ax;w.vx+=(ax*78-w.vx)*Math.min(1,4*dt);w.vy+=((up?-70:dw?85:20)-w.vy)*Math.min(1,5*dt);
+ w.x=Math.max(10,Math.min(SWL+40,w.x+w.vx*dt));w.y=Math.max(30,Math.min(194,w.y+w.vy*dt));
+ if(Math.random()<dt*(ax||up?9:3))w.bb.push({x:w.x-w.dir*6,y:w.y-4,vy:-18-Math.random()*14,l:1.2});
+ w.bb=w.bb.filter(b=>(b.l-=dt)>0&&(b.y+=b.vy*dt)>22);
+ SWT.forEach((t,i)=>{if(!w.sd[i]&&w.x>=t[0]){w.sd[i]=1;swSay(t[1],4.5)}});
+ for(const h of SWH){const p=swP(h,w.t),k=h[0];if(w.inv<=0&&Math.abs(p.x-w.x)<(k=='b'?13:14)&&Math.abs(p.y-w.y)<(k=='f'?10:11)){swHit(k);break}}
+ w.it.forEach(i=>{if(!i.g&&Math.abs(i.x-w.x)<10&&Math.abs(i.y-w.y)<11){i.g=1;w.got++;w.ck=Math.max(40,i.x-30);S.sc+=40;sfx(880,.2,'sine',1500);swSay(w.got<5?'AMOSTRA '+w.got+' DE 5 COLETADA!':'TODAS AS AMOSTRAS! ENTRE NO PORTAL!',3);for(let k=0;k<8;k++)w.bb.push({x:i.x,y:i.y,vy:-30-Math.random()*20,l:.8})}});
+ w.cam+=(Math.max(0,Math.min(SWL+80-384,w.x-150))-w.cam)*Math.min(1,6*dt);
+ $('hs').textContent='Rio Esquecido · Amostras '+w.got+'/5 · Fôlego '+w.hp+'/3';
+ if(w.got>=5&&Math.abs(w.x-1500)<14&&Math.abs(w.y-110)<22)swimEnd()}
+function swimEnd(){S.mode='panel';S.lv.riv1=1;S.sc+=100;S.cr=Math.min(100,S.cr+5);save();jingle([523,659,784,1047],'square',.14);
+ panel('<h3>PORTAL DAS ÁGUAS</h3><p>As 5 amostras estão com Leco! Ele atravessa o portal e emerge, encharcado, perto da saída da fábrica.</p><p>+140 pontos · +5 credibilidade. A porta final já pode ser aberta.</p>'+btn('swimOut()','SAIR DO RIO'))}
+function swimOut(){close();sw=null;S.mode='play';Object.assign(P,{x:735,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:735,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;save()}
+
+function swimDraw(){const w=sw,c=Math.round(w.cam),t=T;g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;
+ g.fillStyle='#8EDBFF';g.fillRect(0,0,384,22);g.fillStyle='#5d7280';[[40,10],[96,16],[230,12],[300,18]].forEach(a=>{const px=((a[0]-c*.2)%420+420)%420-30;g.fillRect(px,22-a[1],12,a[1]);g.fillRect(px-3,22-a[1],18,3)});
+ ['#6ec6e8','#58b4dc','#449fc9','#3689b3','#2b739c','#245f85'].forEach((k,i)=>{g.fillStyle=k;g.fillRect(0,22+i*32,384,32)});
+ g.fillStyle='rgba(255,246,170,.10)';for(let i=0;i<5;i++){const x0=((i*95-c*.3+Math.sin(t*.5+i)*8)%480+480)%480-50;for(let y=22;y<190;y+=3)g.fillRect(Math.round(x0+y*.3),y,8+i,3)}
+ g.fillStyle='#d6f6ff';for(let x=0;x<384;x+=3)g.fillRect(x,22+Math.round(Math.sin(t*2+(x+c)*.12)),3,1);
+ g.fillStyle='#9A6848';g.fillRect(0,202,384,14);g.fillStyle='#7d5238';for(let x=((-c)%14+14)%14-14;x<384;x+=14)g.fillRect(x,204+(((x+c)*7)&3),5,2);
+ for(let i=0;i<24;i++){const wx=i*67+20-c;if(wx<-10||wx>394)continue;for(let j=0;j<6;j++){g.fillStyle=j&1?'#3c8a3a':'#4aa86e';g.fillRect(wx+Math.round(Math.sin(t*1.6+i+j*.6)*j*.6),202-j*5,3,5)}}
+ for(let i=0;i<9;i++){const wx=i*173+60-c;if(wx<-10||wx>394)continue;g.fillStyle='#8b99a6';g.fillRect(wx,198,6,5);g.fillStyle='#c3ccd5';g.fillRect(wx,198,6,1)}
+ w.it.forEach(i=>{if(i.g)return;const x=Math.round(i.x-c),y=Math.round(i.y+Math.sin(t*3+i.x)*2);if(x<-12||x>396)return;g.globalAlpha=.25+.15*Math.sin(t*5+i.x);el(g,x,y,9,9,'#fff8b0');g.globalAlpha=1;g.fillStyle='#2b4a5a';g.fillRect(x-3,y-4,6,9);g.fillStyle='#bfe9f5';g.fillRect(x-2,y-3,4,7);g.fillStyle='#6fbf4a';g.fillRect(x-2,y,4,4);g.fillStyle='#c98b5a';g.fillRect(x-2,y-6,4,3)});
+ SWH.forEach(h=>{const p=swP(h,t),x=Math.round(p.x-c),y=Math.round(p.y);if(x<-20||x>404)return;
+  if(h[0]=='b'){g.fillStyle='#1d1a17';g.fillRect(x-9,y-7,18,14);g.fillStyle='#8b2e22';g.fillRect(x-8,y-6,16,12);g.fillStyle='#d8d0c8';g.fillRect(x-8,y-3,16,1);g.fillRect(x-8,y+3,16,1);g.fillStyle='#ffd45a';g.fillRect(x-2,y-1,4,3);g.fillStyle='#1d1618';g.fillRect(x+3+Math.round(Math.sin(t*4+h[1])),y-10-(((t*12+h[1])%8)|0),1,2)}
+  else if(h[0]=='o'){el(g,x,y,10,7,'#1d1618');el(g,x-3,y-2,4,2,'#5a4a6a');g.fillStyle='#7b5cff';g.fillRect(x+2,y+1,3,1);g.fillStyle='#43B95C';g.fillRect(x-5,y+2,3,1)}
+  else{const d=p.d;el(g,x,y,9,5,'#1d3a2f');el(g,x,y,8,4,'#6fbf4a');g.fillStyle='#1d3a2f';g.fillRect(x-d*11,y-4,3,8);g.fillRect(x-d*13,y-5,2,10);g.fillStyle='#fff';g.fillRect(x+d*5,y-2,2,2);g.fillStyle='#000';g.fillRect(x+d*6,y-2,1,1);el(g,x-d,y+1,3,3,'#3a2a22');el(g,x-d,y+1,2,2,'#ffd45a');g.fillStyle='#fff8e6';g.fillRect(x-d-1,y,2,2)}});
+ {const x=Math.round(1500-c),y=110,op=w.got>=5,lb=op?'PORTAL':'FECHADO';if(x>-30&&x<414){if(op){for(let i=0;i<4;i++)for(let k=0;k<22;k++){const a=k/22*6.283+t*(2+i*.7)*(i&1?-1:1),r=17-i*3.5;g.fillStyle=['#b36cff','#e6c8ff','#7b5cff','#ffffff'][i];g.fillRect(Math.round(x+Math.cos(a)*r*.7),Math.round(y+Math.sin(a)*r*1.3),2,2)}g.globalAlpha=.5+.3*Math.sin(t*6);el(g,x,y,7,12,'#f1e2ff');g.globalAlpha=1}
+  else{g.globalAlpha=.55;g.fillStyle='#8b99a6';for(let k=0;k<22;k++){const a=k/22*6.283;g.fillRect(Math.round(x+Math.cos(a)*12),Math.round(y+Math.sin(a)*22),2,2)}g.globalAlpha=1}pt3(lb,x-(tw(lb)>>1),y+30,'#fff4d0')}}
+ if(!(w.inv>0&&((t*14)|0)%2)){g.save();g.translate(Math.round(w.x-c),Math.round(w.y+11+Math.sin(t*5)*1.5));g.scale(w.dir,1);g.rotate(Math.max(-.5,Math.min(.5,w.vy*.006)));g.drawImage(lecoCv(0,0,0,0),-13,-22);g.restore()}
+ g.fillStyle='#e8fbff';w.bb.forEach(b=>{g.globalAlpha=Math.min(1,b.l);g.fillRect(Math.round(b.x-c),Math.round(b.y),2,2)});g.globalAlpha=1;
+ g.fillStyle='rgba(29,58,47,.75)';g.fillRect(4,3,86,13);pt3('AMOSTRAS '+w.got+' DE 5',8,7,'#fff4d0');for(let i=0;i<3;i++)el(g,350+i*10,9,3,3,i<w.hp?'#e2564b':'#3a4a58');
+ if(w.mt>0)txt(w.msg,192,208);
+ if(w.t<.6){g.fillStyle='rgba(255,255,255,'+(1-w.t/.6)+')';g.fillRect(0,0,384,216)}}
+
 // ---------- LOOP E ENTRADA ----------
 
 // ---------- FISCAIS DO GREENWASHING (fases 4 a 6): inimigos que atiram · 3 linguadas · selo dourado + folha ----------
@@ -572,10 +620,10 @@ function drone2(x,y){const I='#1d1a17',pr=((T*30)|0)%2;g.fillStyle=I;g.fillRect(
  g.fillRect(x-5,y+2,10,6);g.fillStyle='#e8eef2';g.fillRect(x-4,y+3,8,4);g.fillStyle='#64c75b';g.fillRect(x-4,y+3,8,1);g.fillStyle='#8b99a6';g.fillRect(x+2,y+3,2,4);
  g.fillStyle=I;g.fillRect(x-2,y+8,4,2);g.fillStyle='#8b99a6';g.fillRect(x-1,y+10+(((T*8)|0)%2),2,1)}
 let last=0;function loop(ts){const dt=Math.min((ts-last)/1000||0,.033);last=ts;T+=dt;joy=Math.max(0,joy-dt);
- if(S.mode=='play')step(dt);
+ if(S.mode=='play')step(dt);if(S.mode=='swim')swimStep(dt);
  if(S.mode=='end'&&Math.random()<.4)pt.push({x:Math.random()*384,y:0,vx:0,vy:50,l:3,c:BC[pt.length%4]});
  pt=pt.filter(p=>(p.l-=dt)>0);pt.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(S.mode=='end'?0:200)*dt});
- draw();requestAnimationFrame(loop)}
+ if(sw&&(S.mode=='swim'||S.mode=='panel'))swimDraw();else draw();requestAnimationFrame(loop)}
 const JK=[' ','w','arrowup'];
 function dn(k){k=k.toLowerCase();K[k]=1;
  if(k=='escape'){if(S.mode=='play')pauseP();else if(S.mode=='pause')resume();return}
