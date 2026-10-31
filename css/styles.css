@@ -36,3 +36,5 @@ body.mn #ts{display:none!important}
 .k.r{background:#c0392b}
 .hw .o{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #0b241a}
 @media(max-width:560px){.hw{grid-template-columns:1fr}}
+.hs{margin:12px 0 2px;font-size:clamp(11px,1.5vw,13px);letter-spacing:.14em;color:#4f7a3a;text-align:left;border-bottom:2px solid #d6bf88;padding-bottom:2px}
+.pn .hw img{height:auto;max-height:none}
