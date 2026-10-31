@@ -477,8 +477,8 @@ const I6D=[6,7,8.5,6.5,15,3.5],I6T=[0,6,13,21.5,28,43],I6L=46.5,
 I6P={o:['#17407f','#2a6fc0','#4a95e0'],l:['#1f6a2c','#4caf50','#8fd36a'],d:['#141a18','#26332f','#3c4d46'],e:['#241a18','#53402f','#7a6650'],c:['#b8c8dc','#e6eef7','#ffffff'],s:['#2a2024','#4a3a3e','#6a5a5a'],i:['#a8c8e8','#e8f4ff','#ffffff'],j:['#4a4040','#6a6060','#8a8080']},
 I6X=[[['Houve um tempo em que a Terra era verde',.8,5.4,166],['e cheia de vida...',2.6,5.4,182]],
 [['O greenwashing espalhou promessas bonitas.',.6,6.4,166],['Os consumidores acreditaram nas empresas...',3,6.4,182]],
-[['E o mundo foi contaminado',4.6,8.2,166],['e destruído por completo.',6,8.2,182]],
-[['Mas podemos deter isso!',1.2,6.2,166],['O principal vilão disso é o Ecofachada!',3,6.2,182]],
+[['E o mundo foi contaminado',4.6,8.2,166],['e pode ser destruído por completo em breve...',6,8.2,182]],
+[['Mas ainda dá tempo de reverter isso!',1.2,6.2,166],['O principal vilão disso é o Ecofachada!',3,6.2,182]],
 [['Ele se disfarçou de sustentável',1.2,5.2,166],['esse tempo todo...',2.6,5.2,182],['Mas agora ele revelou a sua verdadeira face:',8.4,14.4,166],['Ele usava uma máscara!',11,14.4,182]]];
 const i6c=(s,y,c,k)=>pt3(s,Math.round(192-tw(s)*k/2),y,c,k);
 function intro6Start(){I6={t:0,rot:0,sc:-1,lb:0,fl:0,u:0};S.mode='intro6';$('h').style.display='none'}
@@ -508,7 +508,7 @@ function i6Eco(u){const T=I6.t,ev=Math.min(1,Math.max(0,(u-5.4)/1.2)),mk=Math.mi
  if(ev>0){g.globalAlpha=(.3*ev+(mk>.9?.1:0))*(.7+.3*Math.sin(T*6));el(g,192,90,170,100,'#5a0a10');g.globalAlpha=1}
  g.globalAlpha=Math.min(1,u/.8);i6c('ECOFACHADA',10,e5?'#ff3b2f':'#8fdc63',2);g.globalAlpha=1;
  g.save();g.translate(192,152);g.scale(2,2);if(ev>0&&mk<1)g.translate(Math.round(Math.sin(T*47)*ev*.8),0);
- if(mk>=0){const ob=boss,oc=cam,obp=bp;boss={x:0,hp:ev>.5?8:30,st:mk>0?'vuln':'idle',flash:0,dead:0};cam=0;bp=[];g.save();g.translate(0,-28);try{drawBoss()}finally{boss=ob;cam=oc;bp=obp}g.restore();
+ if(mk>=0){const ob=boss,oc=cam,obp=bp;boss={x:0,hp:ev>.5?8:30,st:mk>0?'vuln':'idle',flash:0,dead:0};cam=0;bp=[];g.save();g.translate(0,-180);try{drawBoss()}finally{boss=ob;cam=oc;bp=obp}g.restore();
   if(mk>0&&mk<1){const sl=mk*mk*40,fa=mk*mk*60;[-1,1].forEach(sd=>{g.save();g.globalAlpha=1-mk*.5;g.translate(sd*8.5+sd*sl,-38+fa);g.rotate(sd*mk*.6);g.translate(-sd*8.5,38);g.beginPath();g.rect(sd<0?-17:0,-51,17,26);g.clip();g.fillStyle=BPAL[2][3];g.fillRect(-17,-51,34,26);g.fillStyle=BPAL[2][4];g.fillRect(-17,-51,34,2);[-12,4].forEach(ex=>{g.fillStyle='#fffdf4';g.fillRect(ex,-44,8,8);g.fillStyle='#ff3b2f';g.fillRect(ex+1,-42,6,5)});g.fillStyle='#1d1a17';g.fillRect(-10,-32,20,2);g.fillStyle='#fff';for(let k=0;k<5;k++)g.fillRect(-9+k*4,-30,2,2+(k%2));g.restore()});g.save();g.globalAlpha=1-mk*.5;g.translate(0,-60+fa*1.4);g.rotate(mk*.8);g.drawImage(SP.leaf,-7,-8,14,16);g.restore()}
   g.restore();return}
  [[-20,76],[8,70]].forEach(([dx,h],i)=>{g.fillStyle=O;g.fillRect(dx-1,-h,10,22);g.fillStyle='#6a5a52';g.fillRect(dx,-h+1,8,20);g.fillStyle='#e2564b';g.fillRect(dx,-h+1,8,3);for(let j=0;j<3;j++){g.globalAlpha=.6-j*.17;el(g,dx+4+Math.round(Math.sin(T*2+j+i)*2),-h-5-j*7-(((T*8+i*3)%6)|0),3+j,3+j,'#3a3236')}g.globalAlpha=1});
