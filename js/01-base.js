@@ -1,11 +1,18 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 01-base.js — Base do jogo
+// ─ Atalhos do canvas, ajudantes de desenho básicos e os DADOS das fases (LV).
+// ════════════════════════════════════════════════════════════
+// ─ Atalhos base: $ (getElementById), g (contexto do canvas) e INK (cor de tinta)
 const $=i=>document.getElementById(i),
 g=$('c').getContext('2d'),
 INK='#24364B';
 
+// ─ Compatibilidade: cria roundRect em navegadores que não têm
 if(!g.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h){
   this.rect(x,y,w,h)
 };
 
+// ─ Ajudantes de desenho básicos (rr = retângulo arredondado; demais na sequência)
 const rr=(x,y,w,h,r,c)=>{g.fillStyle=c;
 g.beginPath();
 g.roundRect(x,y,w,h,r);
@@ -17,7 +24,9 @@ ci=(x,y,r,c)=>{
   g.arc(x,y,r,0,7);
   g.fill()
 };
+// ─ CAT: categorias das pistas
 const CAT=['Documento','Detalhe oculto','Registro à distância','Depoimento'];
+// ─ LV: dados de todas as fases (nome, missão, plataformas, pistas, tamanho)
 const LV=[
 {
   n:'Mercado das Aparências',

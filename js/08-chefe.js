@@ -1,14 +1,29 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 08-chefe.js — Chefão Ecofachada e desenho principal
+// ─ Lógica e desenho do chefão; também tem o cenário (água, fundo, plataformas) e a função draw() de cada quadro.
+// ════════════════════════════════════════════════════════════
 // ---------- CHEFE: SR. ECOFACHADA ----------
+// ─ Estado do chefão e dos itens
 let boss=null,bp=[],php=5,arenaX=0,drops=[],dropT=0,pwR=0,pwS=0,lightT=0,vict=0,camDur=3,camMax=3,tipsSeen={},GLW=0,vp=[],zp=[],vs=[],lives=10,chances=3;
+// ─ SEQ: sequências de ataques
 const SEQ=[['sH','sL','sH','sL'],['w','w','w'],['r','r','r','r','r'],['w','sH','r','sL','w'],['sH','w','sL','r','sH','w'],['r','r','r','r','r','r','r'],['sL','sH','w','r','w','sH']],DLY=[.62,.95,.42,.8,.55,.36,.5],CKP=[30,20,10];
+// ─ startBoss: começa a luta
 function startBoss(){foes=[];shots=[];sealFx=null;close();S.mode='play';arenaX=L.w-384;boss={x:L.w-52,hp:30,max:30,st:'idle',t:1.6,open:0,atk:-1,sq:[],flash:0,on:1,dead:0};bp=[];php=5;drops=[];dropT=4;pwR=pwS=lightT=vict=0;camT=camCd=0;chances=3;Object.assign(P,{x:arenaX+30,y:180,vx:0,vy:0,og:1,sp:null});safe={x:arenaX+30,y:180};inv=1.5;toast('Sr. Ecofachada, o responsável pela propaganda, aparece! Desvie e ataque com Espaço sempre que a máscara abrir. C = invisibilidade; pegue os itens que caem do céu!',6500);sfx(110,.6,'sawtooth',60);setTimeout(bossLaugh,700)}
+// ─ bsfx: sons do chefão
 function bsfx(f,d,t,f2,vol=.05,vib=0){if(mute)return;try{AC=AC||new AudioContext();const o=AC.createOscillator(),v=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);if(vib){const l=AC.createOscillator(),lg=AC.createGain();l.frequency.value=vib;lg.gain.value=f*.06;l.connect(lg);lg.connect(o.frequency);l.start();l.stop(n+d)}v.gain.setValueAtTime(vol,n);v.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(v);v.connect(vOut(0));o.start();o.stop(n+d)}catch(e){}}
+// ─ bossLaugh: risada
 function bossLaugh(){for(let i=0;i<5;i++)setTimeout(()=>{bsfx(230-i*16,.17,'sawtooth',150-i*10,.07,26);bsfx(115-i*7,.17,'square',80,.035)},i*200)}
+// ─ bossScream: grito
 function bossScream(){bsfx(300,.9,'sawtooth',1100,.08,38);bsfx(70,1.5,'sawtooth',38,.06,11);setTimeout(()=>bsfx(1100,.7,'sawtooth',170,.07,48),850);setTimeout(bossLaugh,1500)}
+// ─ shoot: ataque do chefão
 function shoot(k,ph){const b=boss,v=125+ph*18;if(k=='w')bsfx(110,.3,'sine',70,.03);else if(k=='r')bsfx(600,.4,'sine',300,.025);else bsfx(220,.3,'triangle',140,.03);if(k=='sH')bp.push({k:'s',x:b.x-26,y:158,vx:-v,vy:0});else if(k=='sL')bp.push({k:'s',x:b.x-26,y:172,vx:-v,vy:0});else if(k=='w'){bp.push({k:'w',x:b.x-30,y:180,vx:-(100+ph*15),vy:0});if(ph>2)bp.push({k:'w',x:b.x-30,y:180,vx:-135,vy:0})}else bp.push({k:'r',x:Math.max(arenaX+14,Math.min(L.w-14,P.x+(Math.random()-.5)*50)),y:-12,vx:0,vy:0,wn:.9-ph*.1});if(ph>=3&&Math.random()<.5)bp.push({k:'r',x:arenaX+20+Math.random()*(L.w-arenaX-110),y:-12,vx:0,vy:0,wn:.9})}
+// ─ bHurt: dano no jogador durante o chefão
 function bHurt(a=1){if(inv>0||camT>0)return;php=+(php-a).toFixed(3);if(boss&&boss.on&&(boss.lt||-9)<T-6){boss.lt=T;setTimeout(bossLaugh,250)}inv=1.4;sh=.25;P.vx=-P.dir*140;P.vy=-120;P.og=0;burst(P.x,P.y-8,'#43B95C',10);sfx(150,.3,'sawtooth');if(phaseStats)phaseStats.damage++;if(php<=.01){php=0;bossLost()}}
+// ─ retryBoss: tenta de novo
 function retryBoss(){close();S.mode='play';boss.hp=CKP.filter(v=>v>=boss.hp).pop()||30;boss.st='idle';boss.t=1.5;boss.open=0;bp=[];php=5;drops=[];dropT=4;pwR=pwS=lightT=0;camT=camCd=0;Object.assign(P,{x:arenaX+30,y:180,vx:0,vy:0,og:1,sp:null});inv=1.5}
+// ─ bossDie: derrota do chefão
 function bossDie(){setTimeout(victBal,900);const b=boss;b.dead=1;b.endT=2.2;bp=[];sh=.5;S.sc+=300;vict=6.5;inv=8;pwR=pwS=0;drops=[];camT=0;sfx(80,1,'sawtooth',30);toast('O vilão caiu! A verdade veio à tona. +300 pontos',3000)}
+// ─ bossStep: atualização do chefão por quadro
 function bossStep(dt){const b=boss;if(!b||!b.on)return;b.flash=Math.max(0,b.flash-dt);
  if(b.dead){b.endT-=dt;if(Math.random()<.6)burst(b.x-20+Math.random()*40,180-Math.random()*60,Math.random()<.5?'#ffb347':'#ffffff',4);if(b.endT<=0){boss=null;bp=[]}return}
  const ph=b.hp>20?0:b.hp>10?1:b.hp>4?2:3;b.t-=dt;if(b.pc==null)b.pc=ph;if(ph!=b.pc){if(ph>b.pc){sh=.5;bossScream();burst(b.x,150,ph>2?'#ff3b2f':'#ff7a1a',30);burst(b.x,150,'#ffd45a',16);toast(['','O SR. ECOFACHADA SE ENFURECE! Ele ficou mais rápido e perigoso!','FÚRIA TOTAL! O chefão perdeu o controle e o ar queima!','ÚLTIMO SURTO! O vilão está no limite: acabe com ele!'][ph],2400)}b.pc=ph}b.hb=(b.hb||0)-dt;if(ph>=1&&b.hb<=0){b.hb=1.1-ph*.22;sfx(52,.22,'sine',34);if(ph>=2)setTimeout(()=>sfx(48,.2,'sine',32),170)}if(ph>=1&&Math.random()<dt*ph*7)pt.push({x:b.x-22+Math.random()*44,y:130-Math.random()*50,vx:(Math.random()-.5)*24,vy:-18-Math.random()*30,l:.8,c:ph>2?'#ff3b2f':ph>1?'#ff7a1a':'#ffd45a'});
@@ -19,7 +34,9 @@ function bossStep(dt){const b=boss;if(!b||!b.on)return;b.flash=Math.max(0,b.flas
  bp.forEach(q=>{if(q.k=='r'){if(q.wn>0){q.wn-=dt;if(q.wn<=0)q.vy=210}else{q.vy+=200*dt;q.y+=q.vy*dt}}else{q.x+=q.vx*dt;q.y+=q.vy*dt}
   const hit=q.k=='s'?Math.abs(P.x-q.x)<10&&Math.abs(P.y-7-q.y)<11:q.k=='w'?Math.abs(P.x-q.x)<8&&P.y>168:q.wn<=0&&Math.abs(P.x-q.x)<10&&q.y+6>P.y-13&&q.y-6<P.y;if(hit&&camT<=0){q.dead=1;if(q.k=='r'){burst(q.x,q.y,'#ff7a1a',16);burst(q.x,q.y,'#ffd45a',8);bsfx(90,.25,'sine',50,.04);bHurt(5/3)}else bHurt()}if(q.k=='r'&&q.wn<=0&&q.y>=176&&!q.dead){q.dead=1;burst(q.x,178,'#ff7a1a',10);burst(q.x,178,'#ffd45a',5);bsfx(120,.12,'sine',70,.025)}if(q.x<arenaX-12||q.y>196)q.dead=1});
  bp=bp.filter(q=>!q.dead);if(Math.abs(P.x-b.x)<26&&P.y>122)bHurt()}
+// ─ BPAL: paletas do chefão por fase de raiva
 const BPAL=[['#8b99a6','#566472','#b8c5d0','#5fb447','#8fdc63'],['#a39080','#665248','#c9b6a2','#b9b43c','#e2dc6a'],['#b36a55','#7a3a30','#e0967c','#e0832e','#ffb35a'],['#7a2f42','#3e1424','#b04a5e','#c8282e','#ff5a4a']];
+// ─ drawBoss: desenha o Ecofachada
 function drawBoss(){const b=boss,x=Math.round(b.x-cam),y=180,fl=b.flash>0&&((T*24)|0)%2,O='#1d1a17',ph=b.hp>20?0:b.hp>10?1:b.hp>4?2:3,PL=BPAL[ph],B=fl?'#ffffff':PL[0],D=fl?'#e8e8e8':PL[1],Lt=fl?'#ffffff':PL[2],M=PL[3],M2=PL[4],op=b.st=='vuln',te=b.st=='tele'||b.st=='fire',ar=te?-8:0;g.save();if(b.dead)g.translate(((T*30)|0)%3-1,0);else if(ph>=2)g.translate(Math.round(Math.sin(T*53)*(ph-1)*.7),0);if(ph>=1){g.globalAlpha=.1+.05*ph+.05*Math.sin(T*(4+ph*3));el(g,x,y-30,44+ph*6,42+ph*5,ph>2?'#ff2a1a':ph>1?'#ff7a1a':'#ffd45a');g.globalAlpha=1}
  [[-20,76],[8,70]].forEach(([dx,h],i)=>{g.fillStyle=O;g.fillRect(x+dx-1,y-h,10,22);g.fillStyle='#6a5a52';g.fillRect(x+dx,y-h+1,8,20);g.fillStyle='#e2564b';g.fillRect(x+dx,y-h+1,8,3);for(let j=0;j<3;j++){g.globalAlpha=.6-j*.17;el(g,x+dx+4+Math.round(Math.sin(T*2+j+i)*2),y-h-5-j*7-(((T*8+i*3)%6)|0),3+j,3+j,'#3a3236')}g.globalAlpha=1});
  g.fillStyle=O;g.fillRect(x-24,y-12,16,12);g.fillRect(x+8,y-12,16,12);g.fillStyle=D;g.fillRect(x-23,y-11,14,10);g.fillRect(x+9,y-11,14,10);
@@ -51,11 +68,17 @@ function drawBoss(){const b=boss,x=Math.round(b.x-cam),y=180,fl=b.flash>0&&((T*2
    el(g,px,fy,6,6,'#d8321f');el(g,px,fy,5,5,'#f2701a');el(g,px,fy+1,3.5,3.5,'#ffb02e');el(g,px,fy+1,2,2,'#fff1a8');
    const w2=((T*16)|0)%3;g.fillStyle='#f2701a';g.fillRect(px-4,fy-7-(w2==0),2,3);g.fillRect(px+2,fy-8+(w2==1),2,4);g.fillRect(px-1,fy-9,2,4);g.fillStyle='#ffb02e';g.fillRect(px-1,fy-8,2,2);
    g.fillStyle='#ffd45a';g.fillRect(px+Math.round(Math.sin(t2*1.3)*8),fy-6-(((T*30)|0)%12),1,1)}})}
+// ─ HRT: sprite do coração
 const HRT=spr(['.rr.rr.','rwrrrrr','rrrrrrr','.rrrrr.','..rrr..','...r...']),HRE=spr(['.rr.rr.','rwrrrrr','rrrrrrr','.rrrrr.','..rrr..','...r...'],{...Q,r:'#4a3a3a',w:'#4a3a3a'});
+// ─ bossHud: barra de vida do chefão
 function bossHud(){const b=boss,w=140,x0=122;for(let i=0;i<5;i++){g.drawImage(HRE,6+i*9,26);const f=Math.max(0,Math.min(1,php-i));if(f>.01){const w=Math.max(1,Math.round(7*f));g.drawImage(HRT,0,0,w,6,6+i*9,26,w,6)}}abilityHud();g.fillStyle='#1d1a17';g.fillRect(x0-2,25,w+4,9);g.fillStyle='#5a1f1f';g.fillRect(x0,27,w,5);const fw=Math.round(w*Math.max(0,b.hp)/b.max);g.fillStyle=b.hp>10?'#e2564b':'#ffb02e';g.fillRect(x0,27,fw,5);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(x0,27,fw,1);g.fillStyle='#1d1a17';g.fillRect(x0+46,27,1,5);g.fillRect(x0+93,27,1,5);const nm=b.hp>10?'SR. ECOFACHADA':b.hp>4?'ECOFACHADA ENFURECIDO':'ECOFACHADA FURIOSO';pt3(nm,192-(tw(nm)>>1),19,b.hp>10?'#fff4d0':b.hp>4?'#ffb35a':'#ff5a4a');pt3('CHANCES '+chances,318,19,'#fff4d0');if(b.hp<=4&&!b.dead){g.globalAlpha=.07+.05*Math.sin(T*9);g.fillStyle='#ff1a1a';g.fillRect(0,0,g.canvas.width,g.canvas.height);g.globalAlpha=1}}
+// ─ joy: controle de toque
 let joy=0;
+// ─ water: desenha a água
 function water(){g.fillStyle='#4fb6e6';g.fillRect(0,176,384,40);g.fillStyle='#3aa0d8';g.fillRect(0,192,384,24);g.fillStyle='#2b86bd';g.fillRect(0,206,384,10);g.fillStyle='#9be3fa';for(let y=178;y<216;y+=5)for(let x=(y%10)*3;x<384;x+=22){g.fillRect(x+Math.round(Math.sin(T*2+x*.1+y)*2),y,4+(y%3),1)}g.fillStyle='#d6f6ff';g.fillRect(0,176,384,1)}
+// ─ badge: medalha/selo
 function badge(x,y,n){const c=['#ffd45a','#6fbf4a','#c3ccd5'][n%3];el(g,x,y,9,9,'#3a2a22');el(g,x,y,8,8,c);el(g,x,y,5,5,'#fff8e6');if(n%3==0){g.fillStyle='#3c8a3a';g.fillRect(x-3,y,2,2);g.fillRect(x-1,y+1,2,2);g.fillRect(x+1,y-1,2,2);g.fillRect(x+3,y-3,1,3)}else if(n%3==1)pt3('?',x-2,y-3,'#2f7535');else{g.fillStyle='#7b8896';g.fillRect(x-3,y,7,1)}}
+// ─ bg: fundo da fase
 function bg(l,cx){const k=l.k;g.drawImage(sky(l),0,0);
  if(k<4)for(let i=0;i<3;i++)g.drawImage(CL,Math.round(mod(i*150-cx*.08+T*3,470)-60),10+(i*17)%36);
  if(k==0){rep(80,.2,(x,n)=>{const h=64+mod(n*37,40),y=180-h;g.fillStyle=mixc(l.sk[1],'#c9a67a',.4);g.fillRect(x,y,70,h);g.fillStyle=mixc(l.sk[1],'#a88a5e',.5);g.fillRect(x,y,70,3);for(let j=0;j<h-20;j+=18)for(let i=0;i<3;i++){g.fillStyle=mixc(l.sk[1],'#7db8d8',.55);g.fillRect(x+8+i*20,y+12+j,10,10)}},cx);
@@ -79,17 +102,21 @@ function bg(l,cx){const k=l.k;g.drawImage(sky(l),0,0);
  if(k==4){g.fillStyle=mixc(l.sk[1],'#d8cdb5',.5);g.fillRect(0,0,384,180);g.fillStyle='#cdbf9f';for(let x=0;x<384;x+=32)g.fillRect(x,0,1,180);g.fillStyle='#b5c7d5';g.fillRect(0,0,384,14);g.fillStyle='#e6c25a';g.fillRect(0,14,384,2);
   rep(100,.5,(x,n)=>{g.fillStyle='#3a2a22';g.fillRect(x-1,39,58,142);g.fillStyle='#e9eef2';g.fillRect(x,40,56,140);g.fillStyle='#b7c9d6';g.fillRect(x+44,40,12,140);g.fillStyle='#fff';g.fillRect(x+2,40,3,140);g.fillStyle='#e6c25a';g.fillRect(x,56,56,4);g.fillRect(x,150,56,4);g.fillStyle='#7aa6c4';g.fillRect(x+14,68,28,50);g.fillStyle='#b9dcf0';g.fillRect(x+16,70,10,24);g.fillStyle='#e6c25a';g.fillRect(x+14,66,28,2)},cx)}
 }
+// ─ plat: desenha plataformas
 function plat(l,x,y,w,h,wx){x=Math.round(x);y=Math.round(y);if(x>384||x+w<0)return;const M=MAT[l.k];
  for(let j=0;j<h;j+=16){const hh=Math.min(16,h-j);for(let i=0;i<w;i+=16){const ww=Math.min(16,w-i);g.drawImage(M.B,0,0,ww,hh,x+i,y+j,ww,hh)}}
  for(let i=0;i<w;i+=16){const ww=Math.min(16,w-i);g.drawImage(M.C,0,0,ww,Math.min(7,h),x+i,y,ww,Math.min(7,h))}
  g.fillStyle=M.o;g.fillRect(x-1,y-1,w+2,1);g.fillRect(x-1,y,1,h);g.fillRect(x+w,y,1,h);if(y+h<216)g.fillRect(x,y+h,w,1);
  const ds=DECO[l.k];if(ds&&w>=20&&wx!=null)for(let i=6;i<w-8;i+=11){const hv=rnd(Math.floor(wx)+i);if(hv<.55){const s=ds[Math.floor(hv*100)%ds.length];g.drawImage(s,x+i+Math.floor(rnd(wx+i+3)*4),y-s.height)}}}
+// ─ leco: desenha o Leco em jogo
 function leco(x,y,d,p,f,cm,ex,pw=0){g.save();if(cm)g.globalAlpha=.6;g.translate(Math.round(x),Math.round(y));if(d<0)g.scale(-1,1);g.drawImage(lecoCv(p,f,cm?1:0,ex,pw),-13,-22);
  if(pw||GLW>0){const w=lecoW(p,f,cm?1:0,ex,pw),ba=cm?.6:1;
   if(pw){g.globalAlpha=ba*(.08+.2*(.5+.5*Math.sin(T*7)));g.drawImage(w,-13,-22);const bx=((T*34)%64)-22;g.save();g.beginPath();g.moveTo(-13+bx,-22);g.lineTo(-13+bx+6,-22);g.lineTo(-13+bx-5,2);g.lineTo(-13+bx-11,2);g.closePath();g.clip();g.globalAlpha=ba*.8;g.drawImage(w,-13,-22);g.restore()}
   if(GLW>0){g.globalAlpha=GLW;g.drawImage(w,-13,-22)}}
  g.restore()}
+// ─ ring: anel
 const ring=(cx,cy,r,c)=>{g.fillStyle=c;const n=Math.max(12,r*4|0);for(let i=0;i<n;i++)g.fillRect(Math.round(cx+Math.cos(i/n*6.283)*r),Math.round(cy+Math.sin(i/n*6.283)*r),1,1)};
+// ─ draw: desenho principal de cada quadro
 function draw(){g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;const m=S.mode,pl=m!='menu'&&m!='end',l=pl?L:LV[3],cx=Math.round(pl?cam:T*18);
  if(sh>0)g.translate(Math.round((Math.random()-.5)*6*sh*3),Math.round((Math.random()-.5)*6*sh*3));
  bg(l,cx);if(pl&&l.k==5)heliBg();if(l.k==3)papers(cx);abyss(l,cx);(pl?st:[[cx-10,180,410,36]]).forEach(([x,y,w,h])=>plat(l,x-cx,y,w,h,pl?x:0));

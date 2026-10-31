@@ -1,15 +1,24 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 11-rio.js — Rio Esquecido
+// ─ Missão subaquática (fase 2) e cinemática de abertura com a Rosa.
+// ════════════════════════════════════════════════════════════
 // ---------- RIO ESQUECIDO: MISSÃO SUBAQUÁTICA (fase 2) ----------
+// ─ Missão subaquática: estado e constantes
 let sw=null;const SWL=1500,
 SWH=[['b',180,60,50,1.1],['o',330,100,45,1.3],['f',430,150,70,1.6],['b',520,110,40,1],['o',640,80,50,1.5],['f',720,60,80,1.4],['b',800,120,45,1.2],['o',960,140,45,1.2],['f',1020,100,80,1.7],['b',1090,160,40,1.1],['o',1230,70,50,1.4],['f',1290,120,80,1.5],['b',1370,100,45,1],['o',1450,150,40,1.3]],
 SWT=[[30,'LECO: QUE ÁGUA TURVA... E O AR ACABA RÁPIDO! ONDE ESTÃO AS AMOSTRAS?'],[400,'O PEIXE SELO ECO É VERDE SÓ NO RÓTULO!'],[880,'BARRIS BIODEGRADÁVEIS... CHEIOS DE SOLVENTE!'],[1250,'O PORTAL SE ABRE COM AS 5 AMOSTRAS NA MOCHILA.']],
 swP=(h,t)=>{const k=h[0],x=h[1],y=h[2],a=h[3],u=Math.sin(t*h[4]+x);return k=='o'?{x:x,y:y+u*a}:k=='b'?{x:x+u*a,y:y+Math.sin(t*.8+x)*4}:{x:x+u*a,y:y,d:Math.cos(t*h[4]+x)>=0?1:-1}},
 SWZ=[[330,520],[820,1020],[1180,1330]],SWA=[[200,70],[480,170],[700,100],[1010,60],[1250,170]],
 swSay=(m,n)=>{sw.msg=m;sw.mt=n};
+// ─ swimIntro: apresentação da missão
 function swimIntro(){S.mode='panel';panel('<h3>O RIO ESQUECIDO</h3><p>Leco escorrega e cai nas águas barrentas do rio... mas o rio não está vazio.</p><p>Sob a superfície, a fábrica escondeu por anos frascos com amostras da água que despejava. Dona Rosa pediu: <b>colete as 5 amostras</b> e prove o que aconteceu.</p><p>Cuidado com barris de chorume, manchas de óleo e peixes-selo &quot;ECO&quot;. Nade com <b>A/D ou ◀ ▶</b>, suba com <b>W</b>/<b>↑</b> e desça com <b>S</b>. Com as 5 amostras, entre no portal.</p>'+btn('swimGo()','MERGULHAR'))}
+// ─ swimGo: começa a missão
 function swimGo(){close();S.mode='swim';sw={x:40,y:34,vx:0,vy:30,dir:1,got:0,hp:3,br:100,zn:0,ar:SWA.map(a=>({x:a[0],y:a[1],u:0,r:0})),inv:1,cam:0,t:0,msg:'',mt:0,ck:40,sd:{},bb:[],it:[[260,120],[560,60],[860,150],[1130,90],[1380,160]].map(a=>({x:a[0],y:a[1],g:0}))};sfx(300,.4,'sine',90)}
+// ─ swHit: dano na missão
 function swHit(k){const w=sw;w.hp--;w.br=Math.max(0,w.br-12);w.inv=1.4;w.vx=-w.dir*90;w.vy=40;sfx(150,.3,'sawtooth');
  if(w.hp<=0){swimOver()}
  else swSay(k=='b'?'BARRIL DE CHORUME! CUIDADO!':k=='o'?'MANCHA DE ÓLEO! DESVIE!':'O PEIXE SELO ECO MORDEU!',2.5)}
+// ─ swimStep: atualização por quadro
 function swimStep(dt){const w=sw;w.t+=dt;w.mt=Math.max(0,w.mt-dt);w.inv=Math.max(0,w.inv-dt);if(vis>0){vis-=dt;if(vis<=0){vis=0;visCd=7;sfx(400,.2,'sine',300)}}else if(visCd>0)visCd=Math.max(0,visCd-dt);
  const ax=(K.d||K.arrowright?1:0)-(K.a||K.arrowleft?1:0),up=K.w||K.arrowup,dw=K.s||K.arrowdown;
  if(ax)w.dir=ax;const cur=Math.sin(w.t*.7+w.x*.01)*10,zn=SWZ.some(z=>w.x>z[0]&&w.x<z[1])&&w.y>96;w.zn=zn;
@@ -26,13 +35,19 @@ function swimStep(dt){const w=sw;w.t+=dt;w.mt=Math.max(0,w.mt-dt);w.inv=Math.max
  w.cam+=(Math.max(0,Math.min(SWL+80-384,w.x-150))-w.cam)*Math.min(1,6*dt);
  $('hs').textContent='Rio Esquecido · Amostras '+w.got+'/5 · Fôlego '+Math.ceil(w.br)+'% · Vidas '+w.hp+'/3';
  if(w.got>=5&&Math.abs(w.x-1500)<14&&Math.abs(w.y-110)<22)swimEnd()}
+// ─ swimEnd: missão concluída
 function swimEnd(){S.mode='panel';const fst=!S.lv['l1-riv'];S.lv['l1-riv']=1;if(fst){S.sc+=100;S.cr=Math.min(100,S.cr+5)}sw.fst=fst;save();jingle([523,659,784,1047],'square',.14);
  panel('<h3>PORTAL DAS ÁGUAS</h3><p>As 5 amostras estão com Leco! Enquanto a placa dizia “ÁGUA PROTEGIDA”, os frascos mostram lama e solvente no rio. Ele atravessa o portal e emerge, encharcado, perto da saída da fábrica.</p><p>'+(fst?'+140 pontos · +5 credibilidade. ':'Amostras já entregues antes. ')+'A porta final já pode ser aberta.</p>'+btn('swimOut()','SAIR DO RIO'))}
+// ─ swimOver: missão perdida
 function swimOver(){if(S.mode!='swim')return;S.mode='panel';sfx(120,.6,'sawtooth',60);panel('<h3>LECO SE AFOGOU</h3><p>As vidas acabaram no fundo do rio. As amostras coletadas nesta tentativa não foram salvas, mas o progresso da fase 3 continua intacto.</p>'+btn('swimGo()','TENTAR NOVAMENTE')+btn('swimLeave()','DEIXAR FASE')+btn('swimMenu()','MENU'))}
+// ─ swimLeave: sai da missão e volta à fase
 function swimLeave(){close();sw=null;S.mode='play';Object.assign(P,{x:475,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:475,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;$('hs').textContent=L.n}
+// ─ swimMenu: volta ao menu
 function swimMenu(){sw=null;menu()}
+// ─ swimOut: saída da água
 function swimOut(){const bx=475;close();sw=null;S.mode='play';Object.assign(P,{x:bx,y:180,vx:0,vy:0,og:1,sp:null,dj:0,sq:0});safe={x:bx,y:180};cam=Math.max(0,Math.min(L.w-384,P.x-192));inv=2;save()}
 
+// ─ swimDraw: desenha a missão
 function swimDraw(){const w=sw,c=Math.round(w.cam),t=w.t,zi=x=>SWZ.some(z=>x>z[0]&&x<z[1]);g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;
  g.fillStyle='#a6c9c4';g.fillRect(0,0,384,22);g.fillStyle='#bcc6a6';g.fillRect(0,13,384,9);
  for(let i=0;i<5;i++){const px=((i*130-c*.15)%650+650)%650-60;g.fillStyle='#6b7681';g.fillRect(px,10,40,12);g.fillStyle='#5b6670';g.fillRect(px+6,3,6,8);g.fillRect(px+26,5,6,6);g.globalAlpha=.55;el(g,Math.round(px+9+Math.sin(t+i)*3),2-(((t*5+i*3)%6)|0),4,3,'#8a8f84');g.globalAlpha=1}
@@ -74,19 +89,28 @@ function swimDraw(){const w=sw,c=Math.round(w.cam),t=w.t,zi=x=>SWZ.some(z=>x>z[0
  if(w.t<.6){g.fillStyle='rgba(255,255,255,'+(1-w.t/.6)+')';g.fillRect(0,0,384,216)}}
 
 // ---------- RIO ESQUECIDO: NARRATIVA DE ABERTURA (margem, cano 4 e cachoeira) ----------
+// ─ Cinemática da Rosa (abertura do Rio)
 let cs=null;
+// ─ CNL: falas da cinemática
 const CNL=[['ROSA','Leco, olha aquela placa: ÁGUA PROTEGIDA. Mas o cano 4 despeja uma lama estranha no rio.'],
 ['LECO','Os peixes estão boiando de barriga para cima. Isso não parece proteção.'],
 ['ROSA','A empresa jura que é totalmente verde. Mas relatório bonito e placa pintada não provam nada. Só a água prova.'],
 ['ROSA','Dizem que a fábrica escondeu amostras do que despejava, atrás da cachoeira. Sem elas, é a palavra deles contra a nossa.'],
 ['LECO','Então eu vou buscar. É só prender o fôlego e trazer as provas.'],
 ['ROSA','Cuidado! Lá embaixo o ar acaba rápido e a lama deixa tudo pior. Procure bolsas de ar e volte vivo!']];
+// ─ cwrap: quebra o texto em linhas
 function cwrap(s,m){const o=[];let l='';s.split(' ').forEach(x=>{if((l+' '+x).trim().length>m){o.push(l);l=x}else l=(l+' '+x).trim()});o.push(l);return o}
+// ─ rosaW: desenha a Rosa
 function rosaW(x,y,fl,w){g.save();g.translate(Math.round(x),Math.round(y));if(fl)g.scale(-1,1);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(-6,0,12,1);g.fillStyle='#5a3a2a';g.fillRect(-4,-8,3,8);g.fillRect(1,-8,3,8);g.fillStyle='#d84f4f';g.fillRect(-6,-22,12,15);g.fillStyle='#f6e7b4';g.fillRect(-4,-18,8,9);g.fillStyle='#c98b5a';g.fillRect(-8,-20,2,8);g.fillRect(6,-22-w*3,2,8);el(g,0,-27,5,5,'#c98b5a');g.fillStyle='#2b2420';g.fillRect(-5,-31,10,3);g.fillStyle='#e3c27b';g.fillRect(-8,-33,16,2);g.fillRect(-5,-36,10,3);g.fillStyle='#1d1a17';g.fillRect(-3,-28,1,2);g.fillRect(0,-28,1,2);g.fillRect(-3,-24,2,1);g.restore()}
+// ─ cineStart: inicia a cinemática
 function cineStart(){S.mode='cine';cs={i:0,t:0,c:0,ph:0,pt:0};$('hs').textContent='Rio Esquecido · Narrativa';sfx(200,.3,'sine',120)}
+// ─ cineNext: avança a fala
 function cineNext(){if(!cs||cs.ph)return;const n=CNL[cs.i][1].length;if(cs.c<n){cs.c=n;return}if(cs.i<CNL.length-1){cs.i++;cs.c=0;sfx(520,.05,'square')}else{cs.ph=1;cs.pt=0;sfx(300,.5,'sine',700)}}
+// ─ cineStep: atualiza a cinemática
 function cineStep(dt){cs.t+=dt;if(cs.ph){cs.pt+=dt;if(cs.pt>=2.7){cs=null;swimGo()}}else cs.c=Math.min(CNL[cs.i][1].length,cs.c+dt*38)}
+// ─ Toque avança a cinemática
 addEventListener('pointerdown',e=>{if(S.mode=='cine'&&e.target.id=='c')cineNext()});
+// ─ cineDraw: desenha a cinemática
 function cineDraw(){const t=cs.t,pt=cs.pt,ph=cs.ph;g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;
  ['#9fd3e6','#a6d0d2','#b3cbb8','#bec7a4','#c8c298'].forEach((k,i)=>{g.fillStyle=k;g.fillRect(0,i*30,384,30)});
  g.fillStyle='#8fb88a';for(let x=0;x<384;x+=4)g.fillRect(x,Math.round(104+Math.sin(x*.035)*9+Math.sin(x*.013)*12),4,80);

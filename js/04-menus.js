@@ -1,8 +1,17 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 04-menus.js — Menus e telas
+// ─ Menu inicial, escolher fase, COMO JOGAR, créditos, pausa, inventário e tela final.
+// ════════════════════════════════════════════════════════════
 // ---------- MENUS ----------
+// ─ menu: tela inicial
 function menu(){S.mode='menu';$('h').style.display='none';document.body.classList.add('mn');fit();panel('<img alt="Leco, o camaleão" src="'+lecoBig()+'"><h1>LECO: ALÉM DO VERDE</h1><p>“Nem tudo que parece verde é sustentável.”</p>'+btn('go(0)','JOGAR')+btn('go(1)','CONTINUAR',!load())+btn('levels()','FASES')+'<br>'+btn('how()','COMO JOGAR')+btn('snd()','EFEITOS: '+(mute?'OFF':'ON'))+btn('musT()','MÚSICA: '+(MO?'OFF':'ON'))+btn('cred()','CRÉDITOS')+'<br>'+vSl())}
+// ─ levels: escolher fase
 function levels(){panel('<h3>ESCOLHER FASE</h3>'+ORD.map((i,p)=>btn('pick('+i+')',(p+1)+'. '+LV[i].n)).join('<br>')+'<br>'+btn('pick(6)','⚔ SÓ O CHEFÃO')+'<br>'+btn('menu()','VOLTAR'))}
+// ─ pick: inicia a fase escolhida
 function pick(i){const d=load();if(d)Object.assign(S,{sc:d.sc|0,cr:d.cr|0,got:d.got||{},lv:d.lv&&typeof d.lv=='object'?d.lv:{},bd:Array.isArray(d.bd)?d.bd:[],ok:d.ok|0,fin:d.fin|0,answered:d.answered&&typeof d.answered=='object'?d.answered:{},pg:d.pg&&typeof d.pg=='object'?d.pg:{}});close();if(i>5){enter(5);bossOnly=1;S.answered[phaseKey(5)]=true;startBoss();cam=L.w-384;return}fresh(i)}
+// ─ snd: liga/desliga o som
 function snd(){mute=mute?0:1;try{localStorage.setItem('leco_m',mute)}catch(e){}S.mode=='pause'?pauseP():menu()}
+// ─ how: tela COMO JOGAR
 function how(){const k=s=>'<span class=k>'+s+'</span>',im=(c,n=2)=>'<img alt="" style="width:'+c.width*n+'px" src="'+c.toDataURL()+'">',o=c=>'<u class=o style="background:'+c+'"></u>',d=(i,t,x,w)=>'<div'+(w?' class=w':'')+'><i>'+i+'</i><em><b>'+t+'</b><span>'+x+'</span></em></div>',hs=t=>'<h4 class=hs>'+t+'</h4>',
  cap=(fn,w,h)=>{let r='';try{const W=g.canvas.width,H=g.canvas.height,bk=g.getImageData(0,0,W,H);g.save();try{g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.fillStyle='#fff6d8';g.fillRect(0,0,w,h);fn();r=im(mk(w,h,x=>x.drawImage(g.canvas,0,0,w,h,0,0,w,h)),1)}finally{g.restore();g.putImageData(bk,0,0)}}catch(e){}return r},
  px=(o)=>new Proxy(o,{get:(q,n)=>n in q?q[n]:0}),
@@ -45,10 +54,17 @@ function how(){const k=s=>'<span class=k>'+s+'</span>',im=(c,n=2)=>'<img alt="" 
  +d(bs(),'SR. ECOFACHADA','Desvie dos ataques e acerte com ESPAÇO quando a máscara abrir. Você tem 3 chances. Use C para ficar invisível.',1)
  +d(o('#a86cf0')+o('#4fb0ff')+im(HRT),'ITENS DO CÉU','Roxo: língua mais longa · Azul: ataque mais forte · Coração: vida (só é pego quando você precisa e some em 5 s).',1)
  +'</div>'+btn('menu()','VOLTAR'))}
+// ─ cred: créditos
 function cred(){panel('<h3>CRÉDITOS</h3><p>LECO: ALÉM DO VERDE<br>Um jogo do universo Verde Real.<br>Personagens, empresas e documentos são fictícios.</p>'+btn('menu()','VOLTAR'))}
+// ─ go: JOGAR / CONTINUAR
 function go(c){if(!c){load()?panel('<h3>Já existe progresso salvo.</h3><p>Começar de novo substitui o progresso atual.</p>'+btn('newG()','SUBSTITUIR')+btn('menu()','CANCELAR')):newG();return}const d=load();if(!d)return;Object.assign(S,{sc:d.sc|0,cr:d.cr|0,got:d.got&&typeof d.got=='object'?d.got:{},lv:d.lv&&typeof d.lv=='object'?d.lv:{},bd:Array.isArray(d.bd)?d.bd:[],ok:d.ok|0,fin:d.fin|0,answered:d.answered&&typeof d.answered=='object'?d.answered:{},pg:d.pg&&typeof d.pg=='object'?d.pg:{}});phaseStartScore=Number.isFinite(d.phaseStartScore)?d.phaseStartScore:d.sc; if(S.fin){S.li=LV.length-1;L=LV[S.li];S.mode='end';endP()}else{enter(d.li);phaseStartScore=Number.isFinite(d.phaseStartScore)?d.phaseStartScore:d.sc;save()}}
+// ─ newG: começa um jogo novo
 function newG(){Object.assign(S,{sc:0,cr:50,got:{},lv:{},bd:[],ok:0,fin:0,answered:{},pg:{}});phaseStartScore=0;save();enter(0)}
+// ─ pauseP: pausa
 function pauseP(){S.mode='pause';panel('<h3>PAUSA</h3><p>MISSÃO: '+L.m+'</p>'+btn('resume()','CONTINUAR')+btn('invP()','INVENTÁRIO')+'<br>'+btn('fresh(S.li,1)','REINICIAR FASE')+btn('levels()','ESCOLHER FASE')+btn('menu()','MENU PRINCIPAL')+'<br>'+btn('snd()','EFEITOS: '+(mute?'OFF':'ON'))+btn('musT()','MÚSICA: '+(MO?'OFF':'ON'))+'<br>'+vSl())}
+// ─ resume: retoma o jogo
 function resume(){close();S.mode='play'}
+// ─ invP: inventário de pistas
 function invP(){const e=S.mode=='end';panel('<h3>INVENTÁRIO DE PISTAS</h3>'+LV.map((l,i)=>`<p><b>${l.n}</b> (${cnt(i)}/${clueTotal(i)})<br><small>`+l.C.map((c,j)=>c[2]===1?null:c[2]===3?'◉ '+c[3]+' [Relato]':S.got[i+'-'+j]?'✔ '+c[3]+' ['+CAT[c[2]]+']':'▫ Pista não encontrada').filter(Boolean).join('<br>')+'</small></p>').join('')+btn(e?'endP()':'pauseP()','VOLTAR'))}
+// ─ endP: tela final
 function endP(){const f=Object.keys(S.got).length,t=S.ok>=LV.length-1&&f>=tot*.9?'Investigador exemplar':S.ok>=2?'Investigador atento':'Investigador em aprendizado';panel('<h1>VERDELÂNDIA APRENDEU!</h1><h3>'+t+'</h3><p>Pontos: '+S.sc+' · Credibilidade: '+S.cr+' · Pistas: '+f+'/'+tot+' · Folhas: '+nLf()+'/'+(E.reduce((a,e)=>a+e.F.length,0)+5)+'</p><p>'+(S.bd.map(b=>'★ '+b).join('<br>')||'Nenhuma insígnia desta vez.')+'</p><p><small>Você aprendeu a pedir evidências antes de concluir.</small></p>'+btn('newG()','JOGAR NOVAMENTE')+btn('invP()','REVISAR')+btn('menu()','MENU'))}

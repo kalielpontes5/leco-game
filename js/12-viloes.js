@@ -1,13 +1,20 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 12-viloes.js — Vilões
+// ─ Os 5 vilões que andam e atiram: dados, IA, tiros, 3 linguadas, selo dourado e desenho.
+// ════════════════════════════════════════════════════════════
 // ---------- LOOP E ENTRADA ----------
 
 // ---------- FISCAIS DO GREENWASHING (fases 4 a 6): inimigos que atiram · 3 linguadas · selo dourado + folha ----------
+// ─ foes/shots: vilões e projéteis em cena
 let foes=[],shots=[],sealFx=null;
+// ─ FOE: dados dos 5 vilões (fase, nome, selo, textos)
 const FOE=[
 {ph:3,n:'PLANTADOR DE PAPEL',seal:'Fiscal Ativo: Plantador de Papel',per:2.7,intro:'Plantador de Papel jura ter reflorestado tudo… com árvores de papel! Ele dispara aviões de promessas vazias. 3 linguadas (Espaço) o desmascaram!',msg:'Avião de promessas! Desvie dele.'},
 {ph:4,n:'DR. SELO-FACIL',seal:'Fiscal Ativo: Dr. Selo-Fácil',per:2.5,intro:'Dr. Selo-Fácil vende certificados “verdes” sem auditar nada e arremessa carimbos APROVADO. 3 linguadas (Espaço) revogam o selo dele!',msg:'Carimbo falso! Desvie dele.'},
 {ph:5,n:'CORTINA DE FUMACA',seal:'Fiscal Ativo: Sra. Cortina de Fumaça',per:3.1,intro:'Sra. Cortina de Fumaça esconde a poluição atrás de nuvens com a palavra ECO. 3 linguadas (Espaço) dissipam a fumaça dela!',msg:'Fumaça maquiada de ECO! Desvie dela.'},
 {ph:4,n:'ANALISTA MAQUIADO',seal:'Fiscal Ativo: Analista Maquiado',per:3,intro:'O Analista Maquiado edita relatórios para parecerem 100% verdes e mira gráficos falsos direto em você! Ele anda sem parar. 3 linguadas (Espaço) o fazem renunciar!',msg:'Gráfico falso mirado em você!'},
 {ph:5,n:'LOBISTA DO PETROLEO',seal:'Fiscal Ativo: Lobista do Petróleo',per:3.3,intro:'O Lobista do Petróleo pinta de verde o que continua sujo e cospe petróleo na sua direção! Ele anda sem parar. 3 linguadas (Espaço) cortam o patrocínio dele!',msg:'Petróleo disfarçado de verde!'}];
+// ─ spawnFoes: coloca os vilões na fase
 function spawnFoes(){foes=[];shots=[];sealFx=null;if(S.li<3||bossOnly)return;
  const PL={3:[[0,.62]],4:[[1,.36],[3,.86]],5:[[2,.3],[4,.76]]}[S.li],gs0=st.filter(p=>p[1]==180&&p[3]>=36&&p[2]>=110&&p[0]>120).map(p=>({p,c:Math.round(p[0]+p[2]/2)}));
  PL.forEach(([t,fr],j)=>{const tx=L.w*fr,lim=S.li==5?L.w-80:S.li==4?L.w-140:L.w,gs=gs0.filter(o=>o.c<=lim&&!foes.some(q=>Math.abs(q.x-o.c)<160));
@@ -17,11 +24,14 @@ function spawnFoes(){foes=[];shots=[];sealFx=null;if(S.li<3||bossOnly)return;
   st=st.filter(q=>!(q[1]<180&&q[1]+q[3]>=179&&o.x+9>q[0]&&o.x-9<q[0]+q[2]));
   if(t>=3){const fr=x=>!st.some(q=>x+7>q[0]&&x-7<q[0]+q[2]&&q[1]<179&&q[1]+q[3]>154);let a=o.x,b=o.x;while(a>o.a&&fr(a-1))a--;while(b<o.b&&fr(b+1))b++;o.a=a;o.b=b}
   if(S.li==3)hz=hz.filter(h=>h.b<o.x-80||h.a>o.x+80);foes.push(o)})}
+// ─ foeShot: tiro do vilão
 function foeShot(s){const k=s.t,y=s.y-12,f=s.f;sfx(k==1?260:k==2?140:520,.12,'square',k==2?90:760);
  if(k==0){const ay=Math.max(-70,Math.min(70,((P.y-9)-y)/(Math.max(40,Math.abs(P.x-s.x))/88)));shots.push({k:0,x:s.x+f*10,y:y,y0:y,vx:f*88,vy:ay,g:0,t:0})}
  else if(k==1){const d=Math.abs(P.x-s.x);shots.push({k:1,x:s.x+f*8,y:y-4,vx:f*Math.max(48,Math.min(118,d*.55)),vy:-125,g:260,t:0})}
  else if(k==2)shots.push({k:2,x:s.x+f*12,y:y,vx:f*68,vy:0,g:0,t:0});else{const tx=P.x-s.x,ty=(P.y-9)-y,dl=Math.hypot(tx,ty)||1,sp=k==3?82:92;shots.push({k:k,x:s.x+f*10,y:y,vx:tx/dl*sp,vy:ty/dl*sp,g:0,t:0})}shots[shots.length-1].m=FOE[k].msg}
+// ─ sAt: há plataforma em x entre as alturas a e b (IA de andar)
 function sAt(x,a,b){return st.some(q=>x>q[0]&&x<q[0]+q[2]&&q[1]<b&&q[1]+q[3]>a)}
+// ─ walkAI: como o vilão anda e pula
 function walkAI(s,dt){
  if(!s.seen){s.x+=s.d*26*dt;if(s.x>s.b)s.d=-1;if(s.x<s.a)s.d=1;return}
  s.hx=s.hx||s.x;s.vy=s.vy||0;s.vx=s.vx||0;
@@ -60,6 +70,7 @@ function walkAI(s,dt){
   if(q){s.y=q[1];s.vy=0}}
  else if(at(s.x,s.y-30,s.y-24))s.vy=.01;
  if(s.y>215){s.x=s.hx;s.y=180;s.vy=s.vx=0}}
+// ─ foeStep: atualização dos vilões por quadro
 function foeStep(dt){if(!foes.length)return;sealFx&&(sealFx.t-=dt)>0||(sealFx=null);
  foes.forEach(s=>{if(s.dead)return;s.flash=Math.max(0,s.flash-dt);if(s.t>=3)walkAI(s,dt);s.f=P.x>=s.x?1:-1;const d=Math.abs(P.x-s.x),act=d<250&&Math.abs(P.y-s.y)<110&&vict<=0;
   if(act&&!s.seen){s.seen=1;toast(FOE[s.t].intro,6500)}
@@ -71,13 +82,16 @@ function foeStep(dt){if(!foes.length)return;sealFx&&(sealFx.t-=dt)>0||(sealFx=nu
   if(st.concat(vs,mv.map(m=>[m.x,m.y,m.w,8])).some(q=>p.x>q[0]&&p.x<q[0]+q[2]&&p.y>q[1]&&p.y<q[1]+q[3])){burst(p.x,p.y,['#fff8e6','#e2564b','#8b99a6','#6fbf4a','#7b5cff'][p.k]||'#fff',6);return false}
   if(camT<=0&&inv<=0&&Math.abs(P.x-p.x)<6+r&&P.y-14<p.y+r&&P.y>p.y-r){hurt(p.m||'Tiro do greenwashing!');return false}
   return true})}
+// ─ hitFoe: linguada no vilão (3 derrotam)
 function hitFoe(i){const s=foes[i];s.hp--;tg=.28;tgT=-1;tongueTarget={x:s.x,y:s.y-10,type:'enemy'};tongueCooldown=.5;s.flash=.3;s.cd=Math.max(s.cd,1);burst(s.x,s.y-12,'#ffd45a',8);sfx(300,.15,'square',900);
  if(s.hp>0){toast('Acertou! Faltam '+s.hp+' linguada'+(s.hp>1?'s':'')+'.',1300);return}
  s.dead=1;shots=[];S.sc+=80;if(phaseStats)phaseStats.enemies++;if(!S.bd.includes(FOE[s.t].seal))S.bd.push(FOE[s.t].seal);
  if(!S.lv[s.k]&&!lf.some(f=>f.k==s.k))lf.push({x:s.x,y:s.y-12,k:s.k});sealFx={x:s.x,y:s.y-26,t:3};burst(s.x,s.y-14,'#ffd45a',22);jingle(WIN);toast('FISCAL ATIVO! Selo dourado conquistado · +80 pontos · uma folha caiu!',4500);save()}
+// ─ goldSeal: desenha o selo dourado
 function goldSeal(x,y,k=1){x=Math.round(x);y=Math.round(y);const R=Math.round(9*k),r=Math.round(8*k),m=Math.round(6*k),c=Math.round(3.5*k);el(g,x,y,R,R,'#3a2a22');el(g,x,y,r,r,'#c98a12');el(g,x,y,r-1,r-1,'#ffd45a');el(g,x,y,m,m,'#ffb02e');el(g,x,y,m-1,m-1,'#fff1a8');
  g.fillStyle='#c98a12';g.fillRect(x-1,y-c,2,c*2);g.fillRect(x-c,y-1,c*2,2);g.fillStyle='#fff';const a=T*3,sx2=Math.round(x+Math.cos(a)*r*.7),sy2=Math.round(y+Math.sin(a)*r*.7);g.fillRect(sx2,sy2,1,1);
  if(((T*6)|0)%2){g.fillRect(x-r-2,y-r,3,1);g.fillRect(x-r-1,y-r-1,1,3)}else{g.fillRect(x+r,y+r-2,3,1);g.fillRect(x+r+1,y+r-3,1,3)}}
+// ─ drawFoes: desenha tiros e vilões
 function drawFoes(){shots.forEach(p=>{const x=Math.round(p.x-cam),y=Math.round(p.y),I='#1d1a17';
   if(p.k==0){g.fillStyle=I;g.fillRect(x-5,y-2,11,5);g.fillStyle='#fff8e6';g.fillRect(x-4,y-1,9,3);g.fillStyle='#c3ccd5';g.fillRect(x-4,y+1,6,1);g.fillStyle='#6fbf4a';g.fillRect(x+3,y-1,2,1)}
   else if(p.k==1){const sp=((T*10)|0)%2;g.fillStyle=I;g.fillRect(x-4,y-4,9,9);g.fillStyle='#e2564b';g.fillRect(x-3,y-3,7,7);g.fillStyle='#ff8a7a';g.fillRect(x-3,y-3,7,1);g.fillStyle='#fff8e6';g.fillRect(x-2,y,2,1);g.fillRect(x-1,y+1,2,1);g.fillRect(x+1,y-1,2,2);if(sp){g.fillStyle='#fff';g.fillRect(x+4,y-5,1,1)}}
@@ -114,4 +128,5 @@ function drawFoes(){shots.forEach(p=>{const x=Math.round(p.x-cam),y=Math.round(p
   g.fillStyle=I;g.fillRect(x-8,y-37,17,4);for(let j=0;j<3;j++){g.fillStyle=j<s.hp?'#e2564b':'#4a3a3a';g.fillRect(x-7+j*6,y-36,5,2)}
   if(Math.abs(P.x-s.x)<150)txt(FOE[s.t].n,x,y-42)});
  if(sealFx){const u=1-sealFx.t/3,x=sealFx.x-cam,y=sealFx.y-u*26;g.save();g.globalAlpha=Math.min(1,sealFx.t*1.2);goldSeal(x,y,1.5);g.restore()}}
+// ─ sealHud: selos conquistados no HUD
 function sealHud(){FOE.filter(o=>o.ph==S.li&&S.bd.includes(o.seal)).forEach((o,j)=>goldSeal(61+j*14,11,.8))}

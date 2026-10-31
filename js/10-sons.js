@@ -1,7 +1,15 @@
+// ════════════════════════════════════════════════════════════
+// ─ ARQUIVO: 10-sons.js — Sons, música e intro da fase 6
+// ─ Efeitos, música, volume, batimento de vida baixa, animação de abertura da fase 6 e módulos novos por quadro.
+// ════════════════════════════════════════════════════════════
 // ---------- SONS DE VITÓRIA E DERROTA (chiptune) ----------
+// ─ Melodias de vitória e derrota
 const WIN=[523,659,784,1047,0,784,1047,1319],BIG=[523,659,784,1047,988,1047,1175,1319,1568],FAIL=[392,370,349,330,0,262,196];
+// ─ NZB: cache de ruído
 const NZB={};
+// ─ nzB: gera ruído
 function nzB(d){const k=d.toFixed(2);if(!NZB[k]){AC=AC||new AudioContext();const n=Math.max(1,AC.sampleRate*d|0),b=AC.createBuffer(1,n,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;NZB[k]=b}return NZB[k]}
+// ─ stampSfx: som de carimbo
 function stampSfx(k,x){if(mute)return;const dx=Math.abs(P.x-x);if(dx>340)return;try{AC=AC||new AudioContext();const n=AC.currentTime+.01,out=AC.createGain();const cp=AC.createDynamicsCompressor();cp.threshold.value=-14;cp.ratio.value=6;cp.connect(vOut(0));out.gain.value=Math.max(.3,1-dx/340)*1.9;out.connect(cp);
  const env=(a,pk,d,t0)=>{a.gain.setValueAtTime(.0001,t0);a.gain.exponentialRampToValueAtTime(pk,t0+.008);a.gain.exponentialRampToValueAtTime(.0001,t0+d)};
  const osc=(ty,f1,f2,d,pk,t0,fl)=>{const o=AC.createOscillator(),a=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(f2,t0+d);env(a,pk,d,t0);if(fl){const f=AC.createBiquadFilter();f.type=fl[0];f.frequency.value=fl[1];o.connect(f);f.connect(a)}else o.connect(a);a.connect(out);o.start(t0);o.stop(t0+d+.03)};
@@ -11,7 +19,9 @@ function stampSfx(k,x){if(mute)return;const dx=Math.abs(P.x-x);if(dx>340)return;
  else if(k==1){osc('sine',150,34,.42,.34,n);noi('lowpass',1400,120,.22,.3,n);osc('square',210,95,.12,.08,n,['lowpass',700]);[311,467,743].forEach((f,i)=>osc('triangle',f,f*.985,.3-i*.04,.045,n+.01));osc('sine',70,40,.5,.12,n+.14);noi('highpass',3000,1200,.12,.05,n+.05)}
  else{pn(n);osc('sawtooth',70,160,.5,.035,n,['lowpass',500]);noi('bandpass',500,1600,.45,.04,n);[.05,.2,.35].forEach(d=>osc('square',900,880,.03,.03,n+d))}
 }catch(e){}}
+// ─ MO: música ligada/desligada
 let MO=(()=>{try{return +localStorage.getItem('leco_mm')||0}catch(e){return 0}})(),MB=null,MC=-1,MS=0,MN=0,MK=null,GEST=0,MP={},HP=0,MH=0,HA=[],MQ=null,HO=null,HS=0;
+// ─ MT: temas musicais
 const MT=[
 {b:108,n:32,r:60,sc:[0,2,4,7,9],ch:[[0,0],[9,1],[5,0],[7,0],[0,0],[9,1],[5,0],[7,0]],lw:'triangle',lv:.1,ld:.7,bw:'triangle',bv:.14,bp:1,aw:'square',av:.018,ar:2,pw:'sine',pv:.04,kt:2,sd:11},
 {b:100,n:32,r:57,sc:[0,3,5,7,10],ch:[[0,1],[0,1],[8,0],[7,0],[0,1],[0,1],[5,0],[7,0]],lw:'sawtooth',lv:.045,ld:.45,bw:'sawtooth',bv:.11,bp:1,pw:'sawtooth',pv:.025,kt:3,sd:23},
@@ -23,7 +33,9 @@ const MT=[
 {b:132,n:48,r:50,tn:2,ch:[[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2]],sd:83},
 {b:84,n:32,r:60,sc:[0,2,4,7,9],ch:[[0,0],[7,0],[9,1],[5,0],[0,0],[7,0],[5,0],[7,0]],lw:'triangle',lv:.09,ld:.5,bw:'sine',bv:.14,bp:0,aw:'sine',av:.045,ar:4,pw:'sine',pv:.04,kt:1,sd:97},
 {b:120,n:32,r:60,am:1,ch:[[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2],[0,2]],sd:97}];
+// ─ mf/mh: nota para frequência e hash
 const mf=m=>440*Math.pow(2,(m-69)/12),mh=(a,b,c,d)=>{let h=Math.imul(a,374761393)^Math.imul(b,668265263)^Math.imul(c,2147483647)^Math.imul(d,1274126177);h=Math.imul(h^(h>>>13),1274126177);return(h^(h>>>16))>>>0};
+// ─ heliPass: som de helicóptero
 function heliPass(t){const d=13,dr=Math.random()<.5?-1:1,x=AC.createBufferSource(),lp=AC.createBiquadFilter(),ch=AC.createGain(),lf=AC.createOscillator(),lg=AC.createGain(),en=AC.createGain(),pn=AC.createStereoPanner(),ru=AC.createOscillator(),rl=AC.createBiquadFilter(),rg=AC.createGain();
  x.buffer=nzB(2);x.loop=true;lp.type='lowpass';lp.frequency.value=650;ch.gain.value=.4;lf.type='sine';lg.gain.value=.6;lf.frequency.setValueAtTime(10.4,t);lf.frequency.linearRampToValueAtTime(11.6,t+d*.45);lf.frequency.linearRampToValueAtTime(9.4,t+d);lf.connect(lg);lg.connect(ch.gain);
  ru.type='sawtooth';ru.frequency.value=46;rl.type='lowpass';rl.frequency.value=220;rg.gain.value=1.4;
@@ -31,13 +43,21 @@ function heliPass(t){const d=13,dr=Math.random()<.5?-1:1,x=AC.createBufferSource
  pn.pan.setValueAtTime(-.8*dr,t);pn.pan.linearRampToValueAtTime(.8*dr,t+d);
  x.connect(lp);lp.connect(ch);ch.connect(en);ru.connect(rl);rl.connect(rg);rg.connect(en);en.connect(pn);pn.connect(vOut(0));
  [x,lf,ru].forEach(o=>{o.start(t);o.stop(t+d+.1)});HA.push(en);if(HA.length>4)HA.shift()}
+// ─ mkc: compressor mestre da música
 function mkc(){if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(vOut(1))}return MK}
+// ─ VL: volumes salvos
 let VL=(()=>{try{const a=localStorage.getItem('leco_vs'),b=localStorage.getItem('leco_vm');return[a==null?1:Math.max(0,Math.min(1,+a||0)),b==null?1:Math.max(0,Math.min(1,+b||0))]}catch(e){return[1,1]}})(),VN=[null,null],VB=0;
+// ─ vOut: saída de volume
 function vOut(k){if(!VN[k]){VN[k]=AC.createGain();VN[k].gain.value=VL[k];VN[k].connect(AC.destination)}return VN[k]}
+// ─ setVol: ajusta volume
 function setVol(k,v){VL[k]=Math.max(0,Math.min(1,+v||0));try{localStorage.setItem(k?'leco_vm':'leco_vs',VL[k])}catch(e){}if(VN[k])VN[k].gain.value=VL[k]}
+// ─ vSl: controles de volume
 function vSl(){const r=(l,k,ex)=>'<label style="display:inline-block;margin:8px 10px 0;font-weight:900;font-size:.9em;color:var(--g2)">'+l+' <input type="range" min="0" max="100" step="5" value="'+Math.round(VL[k]*100)+'" oninput="setVol('+k+',this.value/100)"'+(ex||'')+' style="vertical-align:middle;width:110px;accent-color:#4f7a3a"></label>';return r('VOLUME EFEITOS',0,' onchange="sfx(660,.08)"')+r('VOLUME MÚSICA',1)}
+// ─ heartVig: vinheta do coração (vida baixa)
 function heartVig(){if(S.mode!='play'||!lowHp()||!VB)return;const d=(performance.now()-VB)/1000,e=x=>x>0&&x<.3?Math.pow(1-x/.3,1.6):0,i=Math.max(e(d),e(d-.3)*.8);if(i<.02)return;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;const r=g.createRadialGradient(192,108,60,192,108,235);r.addColorStop(0,'rgba(90,0,8,0)');r.addColorStop(1,'rgba(90,0,8,'+(i*.55).toFixed(3)+')');g.fillStyle=r;g.fillRect(0,0,384,216)}
+// ─ Intro da fase 6 (animação de abertura)
 let I6=null;
+// ─ I6D/I6T/I6L/I6X: durações e textos das cenas
 const I6D=[6,7,8.5,6.5,15,3.5],I6T=[0,6,13,21.5,28,43],I6L=46.5,
 I6P={o:['#17407f','#2a6fc0','#4a95e0'],l:['#1f6a2c','#4caf50','#8fd36a'],d:['#141a18','#26332f','#3c4d46'],e:['#241a18','#53402f','#7a6650'],c:['#b8c8dc','#e6eef7','#ffffff'],s:['#2a2024','#4a3a3e','#6a5a5a'],i:['#a8c8e8','#e8f4ff','#ffffff'],j:['#4a4040','#6a6060','#8a8080']},
 I6X=[[['Houve um tempo em que a Terra era verde',.8,5.4,166],['e cheia de vida...',2.6,5.4,182]],
@@ -45,9 +65,13 @@ I6X=[[['Houve um tempo em que a Terra era verde',.8,5.4,166],['e cheia de vida..
 [['E o mundo foi contaminado',4.6,8.2,166],['e pode ser destruído por completo em breve...',6,8.2,182]],
 [['Mas ainda dá tempo de reverter isso!',1.2,6.2,166],['O principal vilão disso é o Ecofachada!',3,6.2,182]],
 [['Ele se disfarçou de sustentável',1.2,5.2,166],['esse tempo todo...',2.6,5.2,182],['Mas agora ele revelou a sua verdadeira face:',8.4,14.4,166],['Ele usava uma máscara!',11,14.4,182]]];
+// ─ i6c: texto centralizado da intro
 const i6c=(s,y,c,k)=>pt3(s,Math.round(192-tw(s)*k/2),y,c,k);
+// ─ intro6Start: inicia a intro
 function intro6Start(){I6={t:0,rot:0,sc:-1,lb:0,fl:0,u:0};S.mode='intro6';$('h').style.display='none'}
+// ─ intro6End: termina a intro
 function intro6End(){if(!I6)return;I6=null;S.mode='play';$('h').style.display='flex';close();K[' ']=0;toast(L.m+' — '+L.t,6000)}
+// ─ intro6Step: atualiza a intro
 function intro6Step(dt){const q=I6;q.t+=dt;if(q.t>=I6L){intro6End();return}let sc=0;for(let i=1;i<6;i++)if(q.t>=I6T[i])sc=i;const u=q.t-I6T[sc];
  if(sc!=q.sc){q.sc=sc;q.lb=0;if(sc==1)sfx(110,1,'sawtooth',70);if(sc==3)sfx(520,1.2,'sine',380);if(sc==4)sfx(330,.5,'triangle',440);if(sc==5)sfx(330,.5,'triangle',880)}
  q.u=u;q.rot+=dt*(sc==0?.22:sc==1?.22+Math.pow(u/7,2)*2.8:sc==2?.5:0);
@@ -56,9 +80,13 @@ function intro6Step(dt){const q=I6;q.t+=dt;if(q.t>=I6L){intro6End();return}let s
  if(sc==4&&u>8&&!q.mk){q.mk=1;sfx(260,.35,'square',90);sfx(120,.9,'sawtooth',50)}
  q.fl=Math.max(0,q.fl-dt*1.6);
  let tc=0;(I6X[sc]||[]).forEach(([s,at,to])=>{if(u>=at&&u<to)tc+=Math.min(s.length,Math.floor((u-at)*28))});const lb=tc/3|0;if(lb>q.lb&&tc)sfx(480+(lb%4)*30,.015,'square');q.lb=lb}
+// ─ i6Stars: estrelas
 function i6Stars(a){for(let i=0;i<70;i++){const x=(i*97+13)%384,y=(i*57+7)%150,b=(Math.sin(I6.t*2+i)+1)*.5;g.globalAlpha=a*(.3+.7*b);g.fillStyle=i%9?'#cfe6ff':'#ffe9a0';g.fillRect(x,y,i%7?1:2,i%7?1:2)}g.globalAlpha=1}
+// ─ i6Smog: fumaça
 function i6Smog(cx,cy,t,k){for(let i=0;i<30;i++){const a=i*.7+t*(.15+(i%4)*.05),r=52+((i*13)%16),z=2+(i%3)*2;g.globalAlpha=Math.min(1,.45*k);g.fillStyle=i%2?'#3b2f33':'#5a4a4a';g.fillRect(Math.round(cx+Math.cos(a)*r),Math.round(cy+Math.sin(a)*r),z,z)}g.globalAlpha=1}
+// ─ i6Seals: selos em órbita da Terra
 function i6Seals(cx,cy,R,t,h,fall,m){for(let i=0;i<6;i++){const a=t*.8+i*1.0472;if((m==1&&Math.sin(a)>=0)||(m==2&&Math.sin(a)<0))continue;const x=Math.round(cx+Math.cos(a)*(R+30)),y=Math.round(cy+Math.sin(a)*(R*.32)+Math.sin(a*2)*4+fall*fall*(60+i*9));if(y>150)continue;g.globalAlpha=Math.max(0,1-fall*.6);const col=h>.6?'#4caf50':h>.3?'#8a9a3a':'#6a5a4a';el(g,x,y,6,6,'#fffdf4');el(g,x,y,5,5,col);g.fillStyle='#fff';g.fillRect(x-1,y-3,3,1);g.fillRect(x-2,y-2,4,3);g.fillRect(x-1,y+1,2,1);g.fillRect(x+1,y+1,1,2)}g.globalAlpha=1}
+// ─ i6Planet: Terra
 function i6Planet(cx,cy,R,rot,h,t){g.fillStyle=h>.5?'#7fc8ff':'#ff6a3a';for(let r=3;r>0;r--){g.globalAlpha=.09*(4-r);for(let y=-R-r;y<=R+r;y+=2){const a=Math.sqrt(Math.max(0,(R+r)*(R+r)-y*y)),b=Math.sqrt(Math.max(0,R*R-y*y)),w=Math.round(a-b)+1;g.fillRect(Math.round(cx-a),cy+y,w,2);g.fillRect(Math.round(cx+b),cy+y,w,2)}}g.globalAlpha=1;
  for(let y=-R;y<R;y+=2)for(let x=-R;x<R;x+=2){const dx=(x+1)/R,dy=(y+1)/R,r2=dx*dx+dy*dy;if(r2>1)continue;
   const z=Math.sqrt(1-r2),lon=Math.atan2(dx,z)+rot,lat=Math.asin(dy),sh=-dx*.6-dy*.4+z*.45,si=sh>.5?2:sh>0?1:0,
@@ -68,7 +96,9 @@ function i6Planet(cx,cy,R,rot,h,t){g.fillStyle=h>.5?'#7fc8ff':'#ff6a3a';for(let 
   if(Math.sin(lon*4+t*.3+lat*3)*Math.sin(lon*2-lat*5+1)>.55)c=(bad?I6P.s:I6P.c)[si];
   else if(bad&&h<.7){if(Math.abs(Math.sin(lon*8+lat*5+t*.5)*Math.cos(lon*5-lat*9))<.14*(1-h))c=(((t*6)|0)+x)%3?'#ff7a1a':'#ffd45a';else if(ld&&((x*7+y*13+((t*9)|0)*5)%41==0))c='#ffb02e'}
   g.fillStyle=c;g.fillRect(cx+x,cy+y,2,2)}}
+// ─ i6Leco: Leco chorando da intro
 let I6LC=null;function i6Leco(cx,cy,t){if(!I6LC){I6LC=new Image();I6LC.src=lecoCry()}if(I6LC.complete&&I6LC.width)g.drawImage(I6LC,Math.round(cx-I6LC.width/2),Math.round(cy-73+((t*5%1)<.12?1:0)))}
+// ─ i6Eco: Ecofachada da intro
 function i6Eco(u){const T=I6.t,ev=Math.min(1,Math.max(0,(u-5.4)/1.2)),mk=Math.min(1,Math.max(0,(u-8)/1.6)),O='#1d1a17',B=ev>.5?BPAL[2][0]:'#8b99a6',D=ev>.5?BPAL[2][1]:'#566472',Lt=ev>.5?BPAL[2][2]:'#b8c5d0',M=ev>.5?BPAL[2][3]:BPAL[0][3],M2=ev>.5?BPAL[2][4]:BPAL[0][4],e5=ev>.5;
  if(ev>0){g.globalAlpha=(.3*ev+(mk>.9?.1:0))*(.7+.3*Math.sin(T*6));el(g,192,90,170,100,'#5a0a10');g.globalAlpha=1}
  g.globalAlpha=Math.min(1,u/.8);i6c('ECOFACHADA',10,e5?'#ff3b2f':'#8fdc63',2);g.globalAlpha=1;
@@ -87,6 +117,7 @@ function i6Eco(u){const T=I6.t,ev=Math.min(1,Math.max(0,(u-5.4)/1.2)),mk=Math.mi
  if(mk<1){const sl=mk*mk*40,fa=mk*mk*60;[-1,1].forEach(sd=>{g.save();g.globalAlpha=1-mk*.5;g.translate(sd*8.5+sd*sl,-38+fa);g.rotate(sd*mk*.6);g.translate(-sd*8.5,38);g.beginPath();g.rect(sd<0?-17:0,-51,17,26);g.clip();mask();g.restore()});
   g.save();g.globalAlpha=1-mk*.5;g.translate(0,-60+fa*1.4/1);g.rotate(mk*.8);g.drawImage(SP.leaf,-7,-8,14,16);g.restore()}
  g.restore()}
+// ─ intro6Draw: desenha a intro
 function intro6Draw(){const q=I6,t=q.t,sc=q.sc,u=q.u||0;g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;g.globalAlpha=1;g.fillStyle='#000';g.fillRect(0,0,384,216);if(sc<0)return;
  i6Stars(sc>=3&&sc<5?.35:sc==5?.6:1);
  const ox=(sc==1&&u>4)?Math.round(Math.sin(t*61)*(u-4)/3):(sc==2&&u<3.5)?Math.round(Math.sin(t*61)*(1+u)):0;
@@ -106,25 +137,35 @@ function intro6Draw(){const q=I6,t=q.t,sc=q.sc,u=q.u||0;g.setTransform(1,0,0,1,0
  const d=I6D[sc];let a=0;if(u<.6)a=1-u/.6;if(u>d-.6)a=Math.max(a,(u-(d-.6))/.6);if(a>0){g.globalAlpha=Math.min(1,a);g.fillStyle='#000';g.fillRect(0,0,384,216);g.globalAlpha=1}
  if(q.fl>0){g.globalAlpha=Math.min(1,q.fl)*.85;g.fillStyle=q.fc||'#fff';g.fillRect(0,0,384,216);g.globalAlpha=1}
  pt3('ESPAÇO: PULAR',380-tw('ESPAÇO: PULAR'),8,'#8a8a8a',1)}
+// ─ lowHp: vida baixa no chefão
 function lowHp(){return !!(boss&&boss.on&&!boss.dead&&vict<=0&&php>0&&php<2)}
+// ─ heartOut: saída do batimento
 function heartOut(){if(!HO){const c=AC.createDynamicsCompressor();c.threshold.value=-6;c.knee.value=0;c.ratio.value=20;c.connect(vOut(0));const g=AC.createGain();g.gain.value=2.4;g.connect(c);HO=g}return HO}
+// ─ heartPulse: som do batimento
 function heartPulse(t){const o=(ty,f0,f1,tb,v,d)=>{const q=AC.createOscillator(),a=AC.createGain();q.type=ty;q.frequency.setValueAtTime(f0,t+tb);q.frequency.exponentialRampToValueAtTime(f1,t+tb+d);a.gain.setValueAtTime(.0001,t+tb);a.gain.linearRampToValueAtTime(v,t+tb+.012);a.gain.exponentialRampToValueAtTime(.0001,t+tb+d+.12);q.connect(a);a.connect(heartOut());q.start(t+tb);q.stop(t+tb+d+.2)},u=.3;
  o('sine',62,34,0,.9,.26);o('triangle',110,55,0,.45,.18);
  o('sine',56,32,u,.75,.22);o('triangle',100,50,u,.35,.15)}
+// ─ heartSting: ferroada do batimento
 function heartSting(t){const o=(f,v,d,at)=>{const q=AC.createOscillator(),a=AC.createGain();q.type='sine';q.frequency.setValueAtTime(f,t);q.frequency.linearRampToValueAtTime(f*.985,t+d);a.gain.setValueAtTime(.0001,t);a.gain.linearRampToValueAtTime(v,t+at);a.gain.setValueAtTime(v,t+d*.45);a.gain.exponentialRampToValueAtTime(.0001,t+d);q.connect(a);a.connect(heartOut());q.start(t);q.stop(t+d+.1)};
  o(5200,.035,3,.25);o(5260,.03,3,.35);o(2600,.012,3,.3)}
+// ─ sfxTick: sons por quadro
 function sfxTick(){const t=AC.currentTime,pl=S.mode=='play'&&!mute;
  if(pl&&L.k==5&&!(boss&&boss.on)){if(t>=HP){heliPass(t);HP=t+13+7+Math.random()*4}}else if(HA.length){HA.forEach(a=>{a.gain.cancelScheduledValues(t);a.gain.setTargetAtTime(0,t,.3)});HA=[]}
  const hc=lowHp();if(!hc)HS=0;else if(pl){if(!HS){HS=1;heartSting(t);MH=t+2.4}if(t>=MH){heartPulse(t);VB=performance.now();MH=t+1.15}}else if(hc&&S.mode=='play'&&performance.now()-VB>1150)VB=performance.now()}
+// ─ victBal: música de vitória
 function victBal(){if(MO||mute&&0)return;try{AC=AC||new AudioContext();if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(vOut(1))}
  const t0=AC.currentTime+.05,bt=60/108,g=AC.createGain();g.gain.setValueAtTime(.9,t0);g.gain.setValueAtTime(.9,t0+3);g.gain.linearRampToValueAtTime(.0001,t0+5.4);g.connect(MK);
  const nn=(w,m,tb,d,v,at)=>{const o=AC.createOscillator(),a=AC.createGain(),t=t0+tb*bt;o.type=w;o.frequency.value=mf(m);a.gain.setValueAtTime(.0001,t);a.gain.linearRampToValueAtTime(v,t+(at||.02));a.gain.exponentialRampToValueAtTime(.0001,t+d*bt);o.connect(a);a.connect(g);o.start(t);o.stop(t+d*bt+.05)};
  [[76,0,.75],[79,.75,.75],[83,1.5,.75],[81,2.25,.75],[81,3,.75],[84,3.75,.75],[88,4.5,3]].forEach(n=>{nn('triangle',n[0],n[1],n[2]*1.1,.14);nn('sine',n[0]+12,n[1],n[2],.04)});
  [[0,[48,55,60,64],1.5],[1.5,[43,50,59,62],1.5],[3,[41,48,57,60],1.5],[4.5,[48,55,64,67],3]].forEach(c=>{nn('sine',c[1][0]-12,c[0],c[2]*1.1,.16);c[1].forEach(m=>nn('triangle',m,c[0],c[2]*1.1,.035,.3));for(let k=0;k<c[2]/.375;k++)nn('sine',c[1][1+k%3]+12,c[0]+k*.375,.5,.05)});
  nn('sine',96,4.5,2.5,.025)}catch(e){}}
+// ─ heliBg: helicópteros de fundo
 function heliBg(){for(let i=0;i<2;i++){const x=Math.round(420-((T*(6+i*3)+i*210)%470)),y=20+i*17+Math.round(Math.sin(T*.8+i*2)*2),f=((T*24)|0)&1;g.fillStyle='rgba(14,22,18,.75)';g.fillRect(x,y,8,3);g.fillRect(x+8,y+1,6,1);g.fillRect(x+13,y-2,1,3);g.fillRect(x+3,y-1,2,1);g.fillRect(f?x-2:x+1,y-2,f?12:6,1);g.fillRect(x+1,y+3,6,1)}}
+// ─ musT: liga/desliga música
 function musT(){MO=MO?0:1;try{localStorage.setItem('leco_mm',MO)}catch(e){}S.mode=='pause'?pauseP():menu()}
+// ─ musWant: qual música tocar
 function musWant(){const m=S.mode;if(m=='menu'||m=='pause')return 9;if(m=='end')return 8;if(sw&&(m=='swim'||m=='panel'))return 6;if(boss&&boss.dead)return -1;if(boss&&boss.on)return 7;return L.k}
+// ─ musStep: toca um passo da música
 function musStep(T,st,t,sd){const bar=((st/16)|0)%T.n,s=st%16,sq=T.n/4,sec=(bar/sq)|0,bi=bar%sq,ty=sec==2?1:(sec>0&&bi>=sq-2?2:0),cd=T.ch[bar%8],base=T.r+cd[0],iv=[[0,4,7],[0,3,7],[0,3,6],[0,7,12]][cd[1]],B=MB,br=base-12;
  const nt=(w,f,d,v,at,fl)=>{const o=AC.createOscillator(),a=AC.createGain();o.type=w;o.frequency.value=f;a.gain.setValueAtTime(.0001,t);a.gain.linearRampToValueAtTime(v,t+(at||.01));a.gain.exponentialRampToValueAtTime(.0001,t+Math.max(d,(at||.01)+.02));let n=o;if(fl){const q=AC.createBiquadFilter();q.type='lowpass';q.frequency.value=fl;o.connect(q);n=q}n.connect(a);a.connect(B);o.start(t);o.stop(t+Math.max(d,(at||.01)+.02)+.05)};
  const no=(ft,f1,d,v)=>{const x=AC.createBufferSource(),q=AC.createBiquadFilter(),a=AC.createGain();x.buffer=nzB(d);q.type=ft;q.frequency.value=f1;a.gain.setValueAtTime(v,t);a.gain.exponentialRampToValueAtTime(.0001,t+d);x.connect(q);q.connect(a);a.connect(B);x.start(t)};
@@ -161,14 +202,19 @@ function musStep(T,st,t,sd){const bar=((st/16)|0)%T.n,s=st%16,sq=T.n/4,sec=(bar/
  else if(k==4){if(s==0||s==3)kick(s?.18:.3)}
  else if(k==5){if(s%4==0||s==10)kick(.28);if(s==4||s==12)snare();if(s%2==0)hat(.045);if(s==14)no('highpass',6000,.18,.05)}
  else if(k==6){if(s==0||s==3||(bar%2&&(s==8||s==11)))kick(s%8?.2:.32);if(bar%4==3&&s==0){const d=sd*16,x=AC.createBufferSource(),q=AC.createBiquadFilter(),a=AC.createGain();x.buffer=nzB(d);q.type='bandpass';q.Q.value=3;q.frequency.setValueAtTime(300,t);q.frequency.exponentialRampToValueAtTime(3500,t+d);a.gain.setValueAtTime(.0001,t);a.gain.exponentialRampToValueAtTime(.09,t+d*.95);a.gain.linearRampToValueAtTime(0,t+d);x.connect(q);q.connect(a);a.connect(B);x.start(t)}}}
+// ─ musTick: laço da música
 function musTick(){if(!AC&&!GEST)return;try{AC=AC||new AudioContext();if(document.hidden){if(AC.state=='running')AC.suspend();return}if(AC.state=='suspended')AC.resume();sfxTick();
  const want=MO?-1:musWant();
  if(want!=MC){if(MB){const o=MB;o.gain.cancelScheduledValues(AC.currentTime);o.gain.setTargetAtTime(0,AC.currentTime,.25);setTimeout(()=>{try{o.disconnect()}catch(e){}},1800)}
   if(MC>=0)MP[MC]=MS;MB=null;MC=want;MS=want>=0&&want!=9?((MP[want]||0)&~15):0;if(want>=0){if(!MK){MK=AC.createDynamicsCompressor();MK.threshold.value=-16;MK.ratio.value=5;MK.connect(vOut(1))}MB=AC.createGain();MB.gain.setValueAtTime(0,AC.currentTime);MB.gain.linearRampToValueAtTime(.55*(MT[want].g||1),AC.currentTime+.8);MQ=AC.createGain();MB.connect(MQ);MQ.connect(MK);MN=AC.currentTime+.08}}
  if(!MB)return;if(MQ)MQ.gain.setTargetAtTime(MC==7?(S.mode=='play'&&lowHp()?.06:.75):1,AC.currentTime,.5);const T=MT[MC],sd=60/T.b/4;while(MN<AC.currentTime+.35){try{musStep(T,MS,MN,sd)}catch(e){}MN+=sd;MS++}}catch(e){}}
+// ─ Libera o áudio no primeiro toque ou tecla
 addEventListener('pointerdown',()=>{GEST=1});addEventListener('keydown',()=>{GEST=1});setInterval(musTick,100);
+// ─ jingle: toque curto
 function jingle(n,t='square',d=.12,v=.06){if(mute)return;try{AC=AC||new AudioContext();const s0=AC.currentTime+.02;n.forEach((f,k)=>{if(!f)return;const o=AC.createOscillator(),a=AC.createGain(),b=s0+k*d;o.type=t;o.frequency.setValueAtTime(f,b);a.gain.setValueAtTime(v,b);a.gain.exponentialRampToValueAtTime(.001,b+d*.95);o.connect(a);a.connect(vOut(0));o.start(b);o.stop(b+d)})}catch(e){}}
+// ─ restartBoss: reinicia o chefão
 function restartBoss(){retryBoss();boss.hp=boss.max;chances=3}
+// ─ newStep: passo extra por quadro
 function newStep(dt){foeStep(dt);
  vp.forEach(v=>{const ov=P.x+6>v.x&&P.x-6<v.x+v.w&&P.y>v.y-1&&P.y-13<v.y+8;
   if(v.mode==0){const on=v.per-v.hid,u=(lt+v.off)%v.per,want=u<on;v.warn=want&&u>on-.7;if(want){if(!v.vis&&!ov)v.vis=1}else v.vis=0}
@@ -178,6 +224,7 @@ function newStep(dt){foeStep(dt);
  zp.forEach(z=>{const u=((lt+z.off)%z.per)/z.per;const pu=z.pu;z.u=u;if(z.kind==0){z.pu=u;if(pu!==undefined&&pu<u){if(pu<.64&&u>=.64)stampSfx(0,z.x);if(pu<.72&&u>=.72)stampSfx(1,z.x);if(pu<.88&&u>=.88)stampSfx(2,z.x)}}
   if(z.kind==0){z.y=u<.64?14:u<.72?14+(u-.64)/.08*166:u<.88?180:180-(u-.88)/.12*166;if(Math.abs(P.x-z.x)<10&&P.y>z.y-30&&P.y-13<z.y)hurt('Carimbo! Passe quando ele subir.')}
   else{z.h=u<.65?0:u<.7?(u-.65)/.05*40:u<.88?40:40*(1-(u-.88)/.12);if(z.h>4&&Math.abs(P.x-z.x)<7&&P.y>180-z.h)hurt('Jato quente! Espere o jato baixar.')}})}
+// ─ drawNew: desenha módulos novos (plataformas que somem etc.)
 function drawNew(){
  vp.forEach(v=>{const x=Math.round(v.x-cam);if(x>384||x+v.w<0)return;
   if(!v.vis){g.fillStyle='rgba(255,255,255,.3)';for(let i=0;i<v.w;i+=4)g.fillRect(x+i,v.y,2,1);return}
@@ -195,5 +242,6 @@ function drawNew(){
    const h=Math.round(z.h);
    if(h>0){for(let j=0;j<h;j+=2){const w=Math.max(2,Math.round(7*(1-j/h)*(.8+.2*Math.sin(T*30+j))));g.fillStyle='#e2564b';g.fillRect(x-w,177-j,w*2,2);g.fillStyle='#ff9b54';g.fillRect(x-(w>>1),177-j,Math.max(1,w),2);if(j<h*.7){g.fillStyle='#ffd45a';g.fillRect(x-(w>>2),177-j,Math.max(1,w>>1),2)}}}
    else if(u<.45&&((T*5+z.x)%1)<.3){g.fillStyle='rgba(255,255,255,.6)';g.fillRect(x-1,172-(((T*20)|0)%5),2,2)}}})}
+// ─ papers: papéis voando
 function papers(cx){for(let i=0;i<22;i++){const d=i%3,sc=[.12,.25,.42][d],sz=[3,4,6][d],al=[.28,.4,.55][d],sp=[7,12,19][d],x=Math.round(mod(i*47-cx*sc*.6+Math.sin(T*.7+i)*(8+d*4),420)-18),y=Math.round(mod(T*sp+i*29,236)-12),w=Math.max(1,Math.round(sz*Math.abs(Math.cos(T*(1.1+d*.4)+i))));
  g.globalAlpha=al;g.fillStyle='#fff6dc';g.fillRect(x,y,w,sz+1+d);if(d==2&&w>3){g.fillStyle='#b9ad8c';g.fillRect(x+1,y+2,w-2,1);g.fillRect(x+1,y+4,w-2,1)}}g.globalAlpha=1}
