@@ -6,7 +6,7 @@ Jogo de investigacao ambiental em pixel art.
 
 - index.html: estrutura principal.
 - css/styles.css: identidade visual e estilos.
-- js/game.js: logica original completa do jogo.
+- js/01-base.js a js/15-iniciar.js: logica do jogo dividida por assunto (base, fases, menus, desenho, chefe, sons, viloes, loop). Carregados em ordem pelo index.html.
 - assets/: recursos externos futuros.
 - backup/: copia integral do HTML original.
 
