@@ -1,7 +1,66 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>LECO: Além do Verde</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ctext y='.9em' font-size='9'%3E🦎%3C/text%3E%3C/svg%3E"><meta name="theme-color" content="#e8f3e8"><meta name="description" content="Uma aventura de investigação ambiental contra o greenwashing.">
-<link rel="stylesheet" href="css/styles.css"></head><body>
-<div id="h"><span id="hn"></span><span id="hs"></span><button onclick="S.mode=='play'&&pauseP()" aria-label="Pausa">❚❚</button></div>
-<div id="w"><canvas id="c" width="384" height="216"></canvas><div id="o"></div></div>
-<div id="ts"></div>
-<div id="t"><div><button data-k="arrowleft">◀</button><button data-k="arrowright">▶</button></div><div><button data-k="arrowup">⤒</button><button data-k="arrowdown">▼</button><button data-k="f">F</button><button data-k=" ">␣</button><button data-k="c">C</button></div></div>
-<script src="js/01-base.js" defer></script><script src="js/02-fases-dados.js" defer></script><script src="js/03-estado.js" defer></script><script src="js/04-menus.js" defer></script><script src="js/05-fase.js" defer></script><script src="js/06-desenho.js" defer></script><script src="js/07-sprites.js" defer></script><script src="js/08-chefe.js" defer></script><script src="js/09-habilidades.js" defer></script><script src="js/10-sons.js" defer></script><script src="js/11-rio.js" defer></script><script src="js/12-viloes.js" defer></script><script src="js/13-inimigos-visual.js" defer></script><script src="js/14-loop-controles.js" defer></script><script src="js/15-iniciar.js" defer></script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>LECO: Além do Verde</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ctext y='.9em' font-size='9'%3E🦎%3C/text%3E%3C/svg%3E">
+    <meta name="theme-color" content="#e8f3e8">
+    <meta name="description" content="Uma aventura de investigação ambiental contra o greenwashing.">
+    <!-- ─ Estilos do jogo (carregados em ordem; a ordem importa) -->
+    <link rel="stylesheet" href="css/01-base.css">
+    <link rel="stylesheet" href="css/02-hud.css">
+    <link rel="stylesheet" href="css/03-paineis.css">
+    <link rel="stylesheet" href="css/04-toast-e-toque.css">
+    <link rel="stylesheet" href="css/05-responsivo.css">
+    <link rel="stylesheet" href="css/06-ajustes-de-tela.css">
+    <link rel="stylesheet" href="css/07-extras.css">
+  </head>
+  <body>
+    <!-- ─ #h: barra superior (fase, pistas e botão de pausa) -->
+    <div id="h">
+      <span id="hn"></span>
+      <span id="hs"></span>
+      <button onclick="S.mode=='play'&&pauseP()" aria-label="Pausa">❚❚</button>
+    </div>
+    <!-- ─ #w: moldura do jogo -->
+    <div id="w">
+      <!-- ─ canvas: tela do jogo (384x216, pixel art) -->
+      <canvas id="c" width="384" height="216"></canvas>
+      <!-- ─ #o: camada dos painéis e menus -->
+      <div id="o"></div>
+    </div>
+    <!-- ─ #ts: mensagens curtas (toast) -->
+    <div id="ts"></div>
+    <!-- ─ #t: controles de toque (celular) -->
+    <div id="t">
+      <div>
+        <button data-k="arrowleft">◀</button>
+        <button data-k="arrowright">▶</button>
+      </div>
+      <div>
+        <button data-k="arrowup">⤒</button>
+        <button data-k="arrowdown">▼</button>
+        <button data-k="f">F</button>
+        <button data-k=" ">␣</button>
+        <button data-k="c">C</button>
+      </div>
+    </div>
+    <!-- ─ Scripts do jogo (carregados em ordem; a ordem importa) -->
+    <script src="js/01-base.js" defer></script>
+    <script src="js/02-fases-dados.js" defer></script>
+    <script src="js/03-estado.js" defer></script>
+    <script src="js/04-menus.js" defer></script>
+    <script src="js/05-fase.js" defer></script>
+    <script src="js/06-desenho.js" defer></script>
+    <script src="js/07-sprites.js" defer></script>
+    <script src="js/08-chefe.js" defer></script>
+    <script src="js/09-habilidades.js" defer></script>
+    <script src="js/10-sons.js" defer></script>
+    <script src="js/11-rio.js" defer></script>
+    <script src="js/12-viloes.js" defer></script>
+    <script src="js/13-inimigos-visual.js" defer></script>
+    <script src="js/14-loop-controles.js" defer></script>
+    <script src="js/15-iniciar.js" defer></script>
+  </body>
+</html>

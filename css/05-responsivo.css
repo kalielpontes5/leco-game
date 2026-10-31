@@ -1,0 +1,60 @@
+/* ══════════════════════════════════════════════════════════ */
+/* ─ ARQUIVO: 05-responsivo.css — Regras responsivas */
+/* ─ Ajustes para telas de toque, estreitas e baixas. */
+/* ══════════════════════════════════════════════════════════ */
+
+/* ─ Telas de toque: mostra os controles */
+@media (pointer: coarse) {
+  #t {
+    display: flex;
+  }
+  :root {
+    --th: 84px;
+  }
+} /* ─ Telas estreitas */
+@media (max-width: 560px) {
+  body {
+    padding: 6px;
+    gap: 8px;
+  }
+  #h {
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    gap: 3px;
+  }
+  #h > * {
+    padding: 3px 5px;
+  }
+  #h button {
+    width: 28px;
+    height: 28px;
+  }
+  .pn {
+    padding: 14px 11px;
+  }
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .b {
+    padding: 9px 10px;
+  }
+} /* ─ Telas baixas no computador */
+@media (max-height: 500px) and (pointer: fine) {
+  body {
+    padding: 4px;
+  }
+  .pn {
+    padding: 10px 16px;
+  }
+  .pn img {
+    max-height: 90px;
+  }
+  .pn p {
+    margin: 4px 0;
+  }
+  .result-grid {
+    margin: 6px 0;
+    gap: 4px;
+  }
+}
